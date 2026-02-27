@@ -1,9 +1,10 @@
-import {
+ï»¿import {
   ArrowLeft,
   BarChart3,
   Briefcase,
   CalendarDays,
   Check,
+  CheckCircle2,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -11,6 +12,7 @@ import {
   Code2,
   CreditCard,
   Dumbbell,
+  Eye,
   ExternalLink,
   Globe2,
   Home,
@@ -23,11 +25,11 @@ import {
   Share2,
   Shield,
   Sparkles,
-  Star,
   Sun,
   TrendingUp,
   Users,
   Video,
+  Zap,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import SidebarCard from "./components/SidebarCard";
@@ -36,7 +38,7 @@ import LeaderboardTable from "./components/LeaderboardTable";
 import { bestDeals, leaderboard, leftFeatures, recentlyListed, rightFeatures } from "./data/mockData";
 
 const categories = [
-  { label: "Artificial Intelligence", Icon: Sparkles },
+  { label: "AI", Icon: Sparkles },
   { label: "SaaS", Icon: Search },
   { label: "Developer Tools", Icon: Code2 },
   { label: "Fintech", Icon: CreditCard },
@@ -70,7 +72,7 @@ const footerColumns = [
   {
     title: "Browse startups",
     links: [
-      "Artificial Intelligence",
+      "AI",
       "SaaS",
       "Developer Tools",
       "Fintech",
@@ -459,6 +461,78 @@ function AddStartupPage({ onClose }) {
   );
 }
 
+
+function AdvertisePage({ onClose }) {
+  return (
+    <section className="mx-auto w-full max-w-[820px] pt-4 sm:pt-8">
+      <div className="overflow-hidden rounded-2xl border border-[#31333a] bg-[linear-gradient(180deg,#2a2a2d_0%,#232427_100%)] shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+        <div className="border-b border-[#3a3d44] px-6 py-5">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="text-[clamp(1.65rem,2vw,2rem)] font-bold tracking-[-0.02em] text-[#f3f5fa]">Advertise on RealMRR</h3>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={onClose}
+              className="rounded-md p-1.5 text-gray-400 transition hover:bg-[#3b3f46] hover:text-white"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <p className="mt-3 text-[clamp(1rem,1.02vw,1.1rem)] leading-relaxed text-gray-300">
+            Reach <span className="font-semibold text-[#9bd0ff]">120K+ entrepreneurs and founders</span> every month.
+          </p>
+        </div>
+
+        <div className="space-y-6 px-6 py-5">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <article className="rounded-xl border border-[#3d4351] bg-[#2a2d33] p-4 text-center">
+              <Users size={20} className="mx-auto text-gray-200" />
+              <p className="mt-2 text-[clamp(1.35rem,1.7vw,1.7rem)] font-bold text-[#dff1ff]">120K+</p>
+              <p className="text-sm text-gray-300">Monthly visitors</p>
+            </article>
+            <article className="rounded-xl border border-[#3d4351] bg-[#2a2d33] p-4 text-center">
+              <Eye size={20} className="mx-auto text-gray-200" />
+              <p className="mt-2 text-[clamp(1.35rem,1.7vw,1.7rem)] font-bold text-[#dff1ff]">High-intent</p>
+              <p className="text-sm text-gray-300">Buyers, not browsers</p>
+            </article>
+            <article className="rounded-xl border border-[#7a2d3d] bg-[#4a252f] p-4 text-center">
+              <Zap size={20} className="mx-auto text-[#ff667f]" />
+              <p className="mt-2 text-[clamp(1.35rem,1.7vw,1.7rem)] font-bold text-[#ff879a]">1/20</p>
+              <p className="text-sm text-[#ffd5dc]">Spots left</p>
+            </article>
+          </div>
+
+          <section>
+            <h4 className="text-[clamp(1.1rem,1.2vw,1.28rem)] font-semibold text-gray-100">How it works</h4>
+            <p className="mt-2 leading-8 text-gray-300">
+              Your startup appears in rotating sponsor slots on desktop sidebars and mobile banners across all RealMRR pages.
+              Sponsors rotate every 10 seconds to ensure fair visibility among all advertisers.
+            </p>
+          </section>
+
+          <section className="rounded-xl border border-[#30333a] bg-[#131518] p-5">
+            <h4 className="text-[clamp(1.1rem,1.2vw,1.28rem)] font-semibold text-gray-100">Pricing</h4>
+            <p className="mt-3 text-[clamp(1.1rem,1.2vw,1.25rem)] text-gray-100">
+              <span className="font-semibold">Monthly rate:</span> <span className="text-[#9fd4ff]">$1,499/month</span>
+            </p>
+            <p className="mt-2 text-[clamp(1rem,1.05vw,1.12rem)] text-gray-300">
+              <span className="font-semibold text-gray-100">1 spot</span> available now. Cancel anytime.
+            </p>
+          </section>
+
+          <a
+            href="#"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#cad2df] bg-[#e8edf6] px-5 py-3 text-[clamp(1rem,1.1vw,1.15rem)] font-semibold text-[#111723] transition hover:bg-white"
+          >
+            Get started ($1,499/mo)
+            <ExternalLink size={15} />
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function DirectoryFooter({ isLight, theme, setTheme, onSelectCategory, activeCategory }) {
   return (
     <>
@@ -563,7 +637,7 @@ function StartupDetail({ profile, onBack, recommendations, onSelectStartup }) {
       <div className="rounded-2xl border border-[#252a35] bg-[#111319] p-4 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs text-gray-500">RealMRR › Startup › {profile.name}</p>
+            <p className="text-xs text-gray-500">RealMRR â€º Startup â€º {profile.name}</p>
             <div className="mt-3 flex items-center gap-3">
               <span className="grid h-14 w-14 place-content-center rounded-full border border-[#3a4f79] bg-[#314b89] text-xl font-bold text-white">
                 {profile.logo}
@@ -767,7 +841,7 @@ function Section({ title, items, onSelectStartup }) {
     <section className="mt-10">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="inline-flex items-center gap-2 rounded-md bg-[#1a1f2a] px-3 py-1 text-[clamp(1.05rem,1.2vw,1.3rem)] font-semibold text-[#f4f7ff] shadow-[inset_0_0_0_1px_#2c3b57]">{title}</h3>
-        <a href="#" className="text-xs text-gray-300 hover:text-white">View all ›</a>
+        <a href="#" className="text-xs text-gray-300 hover:text-white">View all â€º</a>
       </div>
 
       <div className="relative overflow-hidden">
@@ -820,6 +894,9 @@ export default function App() {
   const [isAddStartupPage, setIsAddStartupPage] = useState(() =>
     typeof window !== "undefined" ? window.location.hash === "#add-startup" : false
   );
+  const [isAdvertisePage, setIsAdvertisePage] = useState(() =>
+    typeof window !== "undefined" ? window.location.hash === "#advertise" : false
+  );
   const isLight = theme === "light";
 
   useEffect(() => {
@@ -829,7 +906,9 @@ export default function App() {
 
   useEffect(() => {
     const onHashChange = () => {
-      setIsAddStartupPage(window.location.hash === "#add-startup");
+      const hash = window.location.hash;
+      setIsAddStartupPage(hash === "#add-startup");
+      setIsAdvertisePage(hash === "#advertise");
     };
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
@@ -850,7 +929,16 @@ export default function App() {
   const openStartup = (startup) => {
     setSelectedCategory(null);
     setIsAddStartupPage(false);
+    setIsAdvertisePage(false);
     setSelectedStartup(startup);
+  };
+
+  const openAdvertisePage = () => {
+    setSelectedStartup(null);
+    setSelectedCategory(null);
+    setIsAddStartupPage(false);
+    setIsAdvertisePage(true);
+    window.location.hash = "advertise";
   };
 
   const allStartupCards = useMemo(() => {
@@ -903,6 +991,13 @@ export default function App() {
                   setIsAddStartupPage(false);
                 }}
               />
+            ) : isAdvertisePage ? (
+              <AdvertisePage
+                onClose={() => {
+                  window.history.pushState("", document.title, window.location.pathname + window.location.search);
+                  setIsAdvertisePage(false);
+                }}
+              />
             ) : profile ? (
               <StartupDetail
                 profile={profile}
@@ -921,7 +1016,7 @@ export default function App() {
               <>
                 <section className="pb-5 pt-4 text-center sm:pt-8 lg:pt-10">
                   <div className="inline-flex items-center gap-2 text-[clamp(1.45rem,1.7vw,1.9rem)] font-bold">
-                    <Star className="text-accent" size={26} />
+                    <CheckCircle2 className="text-[#22c55e]" size={38} strokeWidth={2.5} />
                     <span className={isLight ? "text-[#1f2937]" : "text-gray-300"}>RealMRR</span>
                   </div>
 
@@ -943,10 +1038,11 @@ export default function App() {
                       onClick={() => {
                         setSelectedStartup(null);
                         setSelectedCategory(null);
+                        setIsAdvertisePage(false);
                         setIsAddStartupPage(true);
                         window.location.hash = "add-startup";
                       }}
-                      className="shrink-0 rounded-xl border border-gray-300 bg-gray-100 px-6 py-2.5 text-[clamp(0.9rem,0.94vw,0.98rem)] font-semibold text-gray-900"
+                      className="relative shrink-0 overflow-hidden rounded-xl border border-white/95 bg-[linear-gradient(120deg,#88deff_0%,#3d86ff_48%,#6c54ff_100%)] px-6 py-2.5 text-[clamp(0.9rem,0.94vw,0.98rem)] font-semibold text-white ring-1 ring-white/80 shadow-[0_0_0_1px_rgba(255,255,255,0.45),0_0_26px_rgba(156,205,255,0.65),0_12px_30px_rgba(66,116,255,0.45)] transition duration-200 hover:brightness-110 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.65),0_0_34px_rgba(171,217,255,0.8),0_16px_36px_rgba(86,101,255,0.55)] animate-[pulse_2.4s_ease-in-out_infinite]"
                     >
                       + Add startup
                     </button>
@@ -979,6 +1075,7 @@ export default function App() {
               onSelectCategory={(category) => {
                 setSelectedStartup(null);
                 setIsAddStartupPage(false);
+                setIsAdvertisePage(false);
                 setSelectedCategory(category);
               }}
             />
@@ -996,7 +1093,7 @@ export default function App() {
                 onSelect={(entry) => openStartup(entry)}
               />
             ))}
-            <SidebarCard advertise />
+            <SidebarCard advertise onAdvertise={openAdvertisePage} />
           </aside>
         </div>
       </div>
@@ -1005,6 +1102,11 @@ export default function App() {
     </div>
   );
 }
+
+
+
+
+
 
 
 

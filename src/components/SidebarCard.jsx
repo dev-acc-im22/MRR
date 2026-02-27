@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadgeCheck,
   Box,
   Bug,
@@ -47,13 +47,18 @@ export default function SidebarCard({
   icon = "box",
   rotations = [],
   onSelect,
+  onAdvertise,
 }) {
   if (advertise) {
     return (
-      <article className="grid min-h-[108px] place-content-center gap-1 rounded-xl border border-dashed border-[#2a2a2a] bg-[#0e0e0e] text-center text-gray-500 shadow-panel">
+      <button
+        type="button"
+        onClick={onAdvertise}
+        className="grid min-h-[108px] w-full place-content-center gap-1 rounded-xl border border-dashed border-[#2a2a2a] bg-[#0e0e0e] text-center text-gray-500 shadow-panel transition hover:border-[#3e4d72] hover:bg-[#121722]"
+      >
         <strong className="text-[10px] text-gray-300">Advertise</strong>
         <small className="text-[10px]">1/20 spot left</small>
-      </article>
+      </button>
     );
   }
 
@@ -105,3 +110,4 @@ export default function SidebarCard({
     </button>
   );
 }
+

@@ -95,7 +95,7 @@ export const rightFeatures = [
 
 function inferCategory(text) {
   const value = String(text || "").toLowerCase();
-  if (value.includes("ai") || value.includes("artificial")) return "Artificial Intelligence";
+  if (value.includes("ai") || value.includes("artificial")) return "AI";
   if (value.includes("saas") || value.includes("crm")) return "SaaS";
   if (value.includes("dev") || value.includes("api") || value.includes("code") || value.includes("engineering")) return "Developer Tools";
   if (value.includes("fintech") || value.includes("payment") || value.includes("finance") || value.includes("ledger")) return "Fintech";
@@ -112,10 +112,10 @@ function inferCategory(text) {
   return "SaaS";
 }
 const recentlyListedSeed = [
-  { logo: "PT", name: "PicToLines.com", niche: "Artificial Intelligence", revenue: "$98", price: "$1.9k", multiple: "1.6x" },
+  { logo: "PT", name: "PicToLines.com", niche: "AI", revenue: "$98", price: "$1.9k", multiple: "1.6x" },
   { logo: "SS", name: "SetSmart", niche: "SaaS", revenue: "$16k", price: "$499k", multiple: "2.6x" },
-  { logo: "AF", name: "AlgoFuse.ai", niche: "Artificial Intelligence", revenue: "$1.9k", price: "$109k", multiple: "4.8x" },
-  { logo: "MR", name: "motionreplica", niche: "Artificial Intelligence", revenue: "$52", price: "$300", multiple: "1.3x" },
+  { logo: "AF", name: "AlgoFuse.ai", niche: "AI", revenue: "$1.9k", price: "$109k", multiple: "4.8x" },
+  { logo: "MR", name: "motionreplica", niche: "AI", revenue: "$52", price: "$300", multiple: "1.3x" },
   { logo: "UR", name: "UserRally", niche: "AI", revenue: "$20k", price: "$310k", multiple: "1.9x" },
 ];
 
@@ -126,7 +126,7 @@ export const recentlyListed = recentlyListedSeed.map((item) => ({
 
 const bestDealsSeed = [
   { logo: "LF", name: "LeadFind.ai", niche: "SaaS", revenue: "$933", price: "$15k", multiple: "1.3x" },
-  { logo: "CM", name: "Caricature Maker", niche: "Artificial Intelligence", revenue: "$256", price: "$6k", multiple: "2.0x" },
+  { logo: "CM", name: "Caricature Maker", niche: "AI", revenue: "$256", price: "$6k", multiple: "2.0x" },
   { logo: "DP", name: "DropPop", niche: "SaaS", revenue: "$6k", price: "$140k", multiple: "2.0x" },
   { logo: "LK", name: "Looktara", niche: "SaaS", revenue: "$3.1k", price: "$40k", multiple: "1.1x" },
   { logo: "RD", name: "RapidDesk", niche: "DevTools", revenue: "$5.1k", price: "$62k", multiple: "1.5x" },
@@ -222,5 +222,6 @@ export const leaderboard = combined.slice(0, 100).map((row, idx) => ({
   category: row.category || inferCategory(`${row.startup} ${row.startupTag}`),
   forSale: Boolean(row.forSale),
 }));
+
 
 

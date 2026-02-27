@@ -1,11 +1,35 @@
-﻿import { ArrowDown, ArrowUp, ChevronDown, Medal, ShieldCheck, X } from "lucide-react";
+﻿import { ArrowDown, ArrowUp, Check, ChevronDown, Medal, ShieldCheck, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-function SelectPill({ value }) {
+function SelectPill({ id, value, options, isOpen, onToggle, onSelect, minWidth = 118 }) {
   return (
-    <button className="inline-flex min-w-[118px] items-center justify-between rounded-xl border border-[#3a3d46] bg-[#1f2026] px-3.5 py-2 text-xs text-gray-200">
-      <span>{value}</span>
-      <ChevronDown size={13} className="text-gray-500" />
-    </button>
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => onToggle(id)}
+        className="inline-flex items-center justify-between rounded-xl border border-[#3a3d46] bg-[#1f2026] px-3.5 py-2 text-xs text-gray-200"
+        style={{ minWidth }}
+      >
+        <span>{value}</span>
+        <ChevronDown size={13} className="text-gray-500" />
+      </button>
+
+      {isOpen ? (
+        <div className="absolute right-0 top-[calc(100%+6px)] z-20 max-h-56 min-w-full overflow-y-auto rounded-xl border border-[#313644] bg-[#171a22] p-1 shadow-[0_14px_34px_rgba(0,0,0,0.45)]">
+          {options.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => onSelect(option)}
+              className="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-xs text-gray-200 transition hover:bg-[#222a38]"
+            >
+              <span className="truncate">{option}</span>
+              {value === option ? <Check size={12} className="shrink-0 text-[#a8c6ff]" /> : null}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -76,14 +100,114 @@ function SponsoredRow({ index }) {
   );
 }
 
+function parseMoney(value) {
+  const numeric = Number(String(value || "0").replace(/[^\d.-]/g, ""));
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
+function formatMoney(value) {
+  return `$${Math.round(value).toLocaleString()}`;
+}
+
+function getGrowthValue(row) {
+  const pct = Number.parseFloat(String(row.growthPct || "0").replace("%", ""));
+  const safePct = Number.isFinite(pct) ? pct : 0;
+  if (row.growth === "down") return -safePct;
+  if (row.growth === "up") return safePct;
+  return 0;
+}
+
 export default function LeaderboardTable({ rows, onSelectStartup }) {
+  const [metric, setMetric] = useState("MRR");
+  const [period, setPeriod] = useState("All time");
+  const [category, setCategory] = useState("All categories");
+  const [openMenu, setOpenMenu] = useState(null);
+  const filterRef = useRef(null);
+
+  const categoryOptions = useMemo(() => {
+    const values = new Set(rows.map((row) => row.category || "SaaS"));
+    return ["All categories", ...Array.from(values).sort((a, b) => a.localeCompare(b))];
+  }, [rows]);
+
+  const preparedRows = useMemo(() => {
+    const categoryScoped = category === "All categories"
+      ? rows
+      : rows.filter((row) => (row.category || "SaaS") === category);
+
+    const adjusted = categoryScoped.map((row) => {
+      const growthValue = getGrowthValue(row);
+      const baseMrr = parseMoney(row.mrr);
+      const periodFactor = period === "Last 30 days" ? 1 + growthValue / 200 : 1;
+      const computedMrr = Math.max(0, baseMrr * periodFactor);
+
+      return {
+        ...row,
+        computedMrr,
+        computedMrrLabel: formatMoney(computedMrr),
+        growthValue,
+      };
+    });
+
+    adjusted.sort((a, b) => {
+      if (metric === "Growth") {
+        if (b.growthValue !== a.growthValue) return b.growthValue - a.growthValue;
+      }
+      return b.computedMrr - a.computedMrr;
+    });
+
+    return adjusted.map((row, index) => ({ ...row, rank: index + 1 }));
+  }, [rows, category, period, metric]);
+
+  useEffect(() => {
+    const onDocClick = (event) => {
+      if (!filterRef.current?.contains(event.target)) {
+        setOpenMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
   return (
     <section className="mt-12 rounded-2xl border border-[#2a2a2a] bg-[#141414] px-6 py-5 shadow-panel">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h3 className="text-[clamp(1.1rem,1.25vw,1.35rem)] font-bold text-gray-100">Leaderboard</h3>
-        <div className="flex gap-2">
-          <SelectPill value="MRR" />
-          <SelectPill value="All time" />
+        <div ref={filterRef} className="flex flex-wrap gap-2">
+          <SelectPill
+            id="metric"
+            value={metric}
+            options={["MRR", "Growth"]}
+            isOpen={openMenu === "metric"}
+            onToggle={(id) => setOpenMenu((prev) => (prev === id ? null : id))}
+            onSelect={(value) => {
+              setMetric(value);
+              setOpenMenu(null);
+            }}
+          />
+          <SelectPill
+            id="period"
+            value={period}
+            options={["All time", "Last 30 days"]}
+            isOpen={openMenu === "period"}
+            onToggle={(id) => setOpenMenu((prev) => (prev === id ? null : id))}
+            onSelect={(value) => {
+              setPeriod(value);
+              setOpenMenu(null);
+            }}
+            minWidth={126}
+          />
+          <SelectPill
+            id="category"
+            value={category}
+            options={categoryOptions}
+            isOpen={openMenu === "category"}
+            onToggle={(id) => setOpenMenu((prev) => (prev === id ? null : id))}
+            onSelect={(value) => {
+              setCategory(value);
+              setOpenMenu(null);
+            }}
+            minWidth={138}
+          />
         </div>
       </div>
 
@@ -106,7 +230,7 @@ export default function LeaderboardTable({ rows, onSelectStartup }) {
             </tr>
           </thead>
           <tbody>
-            {rows.flatMap((row, idx) => {
+            {preparedRows.flatMap((row, idx) => {
               const isTop3 = row.rank <= 3;
               const rowClass = isTop3 ? "bg-[linear-gradient(90deg,#1b212f_0%,#191d27_100%)] shadow-[inset_3px_0_0_#7aa2ff]" : "";
 
@@ -142,12 +266,12 @@ export default function LeaderboardTable({ rows, onSelectStartup }) {
                       <span className="truncate text-[12px] text-gray-200">{row.founder}</span>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap border-b border-[#222] px-3 py-3.5 text-right text-[14px] font-semibold text-gray-100">{row.mrr}</td>
+                  <td className="whitespace-nowrap border-b border-[#222] px-3 py-3.5 text-right text-[14px] font-semibold text-gray-100">{row.computedMrrLabel}</td>
                   <td className="border-b border-[#222] px-2.5 py-3.5 text-right"><Trend growth={row.growth} growthPct={row.growthPct} /></td>
                 </tr>,
               ];
 
-              if ((idx + 1) % 10 === 0 && idx < rows.length - 1) {
+              if ((idx + 1) % 10 === 0 && idx < preparedRows.length - 1) {
                 items.push(<SponsoredRow key={`ad-${idx + 1}`} index={(idx + 1) / 10} />);
               }
 

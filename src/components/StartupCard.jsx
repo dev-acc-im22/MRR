@@ -1,4 +1,9 @@
 ﻿export default function StartupCard({ item, onSelect }) {
+  const category = item.category || "SaaS";
+  const nicheText = typeof item.niche === "string" ? item.niche.trim() : "";
+  const normalize = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const showNiche = nicheText.length > 0 && normalize(nicheText) !== normalize(category);
+
   return (
     <button
       type="button"
@@ -14,11 +19,11 @@
           {item.logo}
         </span>
         <div className="min-w-0">
-          <p className="truncate text-[11px] font-semibold leading-[1.2] text-[#f5f7fb]">{item.name}</p>
+          <p className="truncate text-[11px] font-semibold leading-[1.2] text-[#5fc0ff]">{item.name}</p>
           <div className="mt-1 flex items-center gap-1.5">
-            <span className="truncate text-[9px] leading-[1.2] text-[#a5acb7]">{item.niche}</span>
-            <span className="shrink-0 rounded-full border border-[#35548a] bg-[#182844] px-1.5 py-[2px] text-[8px] font-semibold text-[#9fc2ff]">
-              {item.category || "SaaS"}
+            {showNiche ? <span className="truncate text-[9px] leading-[1.2] text-[#a5acb7]">{nicheText}</span> : null}
+            <span className="shrink-0 rounded-full border border-[#3b4458]/35 bg-[#202634]/20 px-1.5 py-[2px] text-[8px] font-medium text-[#8c97ad]">
+              {category}
             </span>
           </div>
         </div>
@@ -41,3 +46,6 @@
     </button>
   );
 }
+
+
+
