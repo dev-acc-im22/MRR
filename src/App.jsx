@@ -1,4 +1,4 @@
-ï»¿import {
+import {
   ArrowLeft,
   BarChart3,
   Briefcase,
@@ -993,7 +993,7 @@ function StartupDetail({ profile, onBack, recommendations, onSelectStartup }) {
       <div className="rounded-2xl border border-[#252a35] bg-[#111319] p-4 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs text-gray-500">RealMRR â€º Startup â€º {profile.name}</p>
+            <p className="text-xs text-gray-500">RealMRR › Startup › {profile.name}</p>
             <div className="mt-3 flex items-center gap-3">
               <span className="grid h-14 w-14 place-content-center rounded-full border border-[#3a4f79] bg-[#314b89] text-xl font-bold text-white">
                 {profile.logo}
@@ -1132,6 +1132,63 @@ function CategoryResults({ category, items, onBack, onSelectStartup }) {
     </section>
   );
 }
+function AutoFitPillValue({ value, className, minSizePx = 16, maxSizePx = 34, laptopMinSizePx = null, laptopMaxSizePx = null }) {
+  const pillRef = useRef(null);
+  const textRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    let rafId = 0;
+    const fitText = () => {
+      const pill = pillRef.current;
+      const text = textRef.current;
+      if (!pill || !text) return;
+
+      const isLaptop = window.innerWidth >= 1024;
+      const activeMax = typeof laptopMaxSizePx === "number" && isLaptop ? laptopMaxSizePx : maxSizePx;
+      const activeMin = typeof laptopMinSizePx === "number" && isLaptop ? laptopMinSizePx : minSizePx;
+      text.style.fontSize = `${activeMax}px`;
+      const availableWidth = Math.max(1, pill.clientWidth - 6);
+      const textWidth = text.scrollWidth || 1;
+      const nextSize = Math.min(activeMax, Math.max(activeMin, (availableWidth / textWidth) * activeMax));
+      text.style.fontSize = `${nextSize.toFixed(2)}px`;
+    };
+
+    const scheduleFit = () => {
+      window.cancelAnimationFrame(rafId);
+      rafId = window.requestAnimationFrame(fitText);
+    };
+
+    scheduleFit();
+
+    let observer;
+    if (typeof ResizeObserver !== "undefined" && pillRef.current) {
+      observer = new ResizeObserver(scheduleFit);
+      observer.observe(pillRef.current);
+    }
+
+    window.addEventListener("resize", scheduleFit);
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      if (observer) observer.disconnect();
+      window.removeEventListener("resize", scheduleFit);
+    };
+  }, [value, minSizePx, maxSizePx, laptopMinSizePx, laptopMaxSizePx]);
+
+  return (
+    <span ref={pillRef} className="inline-flex w-full items-center justify-center">
+      <span
+        ref={textRef}
+        className={className}
+        style={{ fontSize: `${laptopMaxSizePx ?? maxSizePx}px` }}
+      >
+        {value}
+      </span>
+    </span>
+  );
+}
+
 function PodiumSection({ rows }) {
   const topThree = rows.slice(0, 3);
   if (topThree.length < 3) return null;
@@ -1142,10 +1199,10 @@ function PodiumSection({ rows }) {
     { position: 3, startup: topThree[2] },
   ];
 
-  const placeLabels = {
-    1: "1st Place",
-    2: "2nd Place",
-    3: "3rd Place",
+  const suffixes = {
+    1: "st",
+    2: "nd",
+    3: "rd",
   };
 
   const cupPalette = {
@@ -1154,28 +1211,40 @@ function PodiumSection({ rows }) {
       metalMid: "#f4c44e",
       metalDeep: "#9c5d05",
       edge: "#f7d06e",
-      glow: "rgba(255, 197, 76, 0.55)",
+      glow: "rgba(255, 197, 76, 0.56)",
     },
     2: {
       metalTop: "#f9fcff",
       metalMid: "#d7dfea",
       metalDeep: "#7f8ba1",
       edge: "#e5ebf5",
-      glow: "rgba(197, 214, 240, 0.45)",
+      glow: "rgba(197, 214, 240, 0.5)",
     },
     3: {
       metalTop: "#ffe0c2",
       metalMid: "#d79a5f",
       metalDeep: "#87431a",
       edge: "#efb47e",
-      glow: "rgba(217, 147, 93, 0.42)",
+      glow: "rgba(217, 147, 93, 0.45)",
     },
   };
 
+  const podiumFrameTone = {
+    1: "bg-[linear-gradient(135deg,#fff7cf_0%,#f2c766_16%,#b5791b_43%,#ffe59a_60%,#9a650f_82%,#f5cc6f_100%)] shadow-[0_0_0_1px_rgba(255,229,154,0.55),0_12px_28px_rgba(0,0,0,0.32)]",
+    2: "bg-[linear-gradient(135deg,#ffffff_0%,#e9eef8_16%,#a2aec4_42%,#f4f8ff_62%,#7b879f_84%,#d9e1f2_100%)] shadow-[0_0_0_1px_rgba(232,239,255,0.5),0_12px_28px_rgba(0,0,0,0.28)]",
+    3: "bg-[linear-gradient(135deg,#ffd8b8_0%,#e4a66a_18%,#a45b2f_44%,#ffd5a9_63%,#7a3f1f_84%,#d9925f_100%)] shadow-[0_0_0_1px_rgba(240,183,133,0.5),0_12px_28px_rgba(0,0,0,0.3)]",
+  };
+
   const podiumTone = {
-    1: "h-32 sm:h-40 border-[#bb7a38] bg-[linear-gradient(180deg,#8a0f1d_0%,#6f0a18_45%,#4c0510_100%)]",
-    2: "h-24 sm:h-32 border-[#a16d32] bg-[linear-gradient(180deg,#7d0d1a_0%,#5c0814_45%,#3c040c_100%)]",
-    3: "h-20 sm:h-28 border-[#9a6830] bg-[linear-gradient(180deg,#750c18_0%,#520710_45%,#34030a_100%)]",
+    1: "bg-[linear-gradient(180deg,#f3dea0_0%,#d8a736_40%,#9b6713_100%)]",
+    2: "bg-[linear-gradient(180deg,#f7fafc_0%,#c8d0dd_40%,#7e889d_100%)]",
+    3: "bg-[linear-gradient(180deg,#f0c39b_0%,#c07b3d_40%,#82461d_100%)]",
+  };
+
+  const podiumTextTone = {
+    1: "text-[#4a2600]",
+    2: "text-[#233147]",
+    3: "text-[#452006]",
   };
 
   const RoyalCup = ({ position }) => {
@@ -1191,41 +1260,41 @@ function PodiumSection({ rows }) {
       <svg viewBox="0 0 260 220" className="h-full w-full" role="presentation" aria-hidden="true">
         <defs>
           <linearGradient id={metalId} x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.96" />
-            <stop offset="10%" stopColor={tone.metalTop} />
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.97" />
+            <stop offset="11%" stopColor={tone.metalTop} />
             <stop offset="46%" stopColor={tone.metalMid} />
             <stop offset="78%" stopColor={tone.metalDeep} />
-            <stop offset="100%" stopColor="#1f1303" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="#1f1303" stopOpacity="0.58" />
           </linearGradient>
           <radialGradient id={rimId} cx="50%" cy="24%" r="86%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.82" />
-            <stop offset="42%" stopColor={tone.metalTop} />
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.85" />
+            <stop offset="40%" stopColor={tone.metalTop} />
             <stop offset="100%" stopColor={tone.metalDeep} />
           </radialGradient>
           <linearGradient id={stemId} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.84" />
-            <stop offset="34%" stopColor={tone.metalTop} />
-            <stop offset="65%" stopColor={tone.metalMid} />
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.87" />
+            <stop offset="36%" stopColor={tone.metalTop} />
+            <stop offset="66%" stopColor={tone.metalMid} />
             <stop offset="100%" stopColor={tone.metalDeep} />
           </linearGradient>
           <linearGradient id={baseId} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.7" />
-            <stop offset="22%" stopColor={tone.metalTop} />
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.75" />
+            <stop offset="23%" stopColor={tone.metalTop} />
             <stop offset="68%" stopColor={tone.metalMid} />
             <stop offset="100%" stopColor={tone.metalDeep} />
           </linearGradient>
           <linearGradient id={glossId} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.85" />
-            <stop offset="45%" stopColor="#ffffff" stopOpacity="0.15" />
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.88" />
+            <stop offset="45%" stopColor="#ffffff" stopOpacity="0.16" />
             <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
           </linearGradient>
           <filter id={glowId} x="-60%" y="-60%" width="220%" height="220%">
-            <feDropShadow dx="0" dy="7" stdDeviation="5" floodColor={tone.glow} floodOpacity="0.52" />
-            <feDropShadow dx="0" dy="1" stdDeviation="1.6" floodColor="#ffffff" floodOpacity="0.3" />
+            <feDropShadow dx="0" dy="7" stdDeviation="5" floodColor={tone.glow} floodOpacity="0.54" />
+            <feDropShadow dx="0" dy="1" stdDeviation="1.6" floodColor="#ffffff" floodOpacity="0.31" />
           </filter>
         </defs>
 
-        <ellipse cx="130" cy="192" rx="78" ry="12" fill={tone.glow} opacity="0.28" />
+        <ellipse cx="130" cy="192" rx="78" ry="12" fill={tone.glow} opacity="0.3" />
 
         <g filter={`url(#${glowId})`}>
           <path
@@ -1236,7 +1305,7 @@ function PodiumSection({ rows }) {
           />
 
           <ellipse cx="130" cy="56" rx="64" ry="15" fill={`url(#${rimId})`} stroke={tone.edge} strokeWidth="2.6" />
-          <path d="M82 60 C92 86 108 99 130 103 C152 99 168 86 178 60" fill="none" stroke="#ffffff" strokeOpacity="0.22" strokeWidth="5" />
+          <path d="M82 60 C92 86 108 99 130 103 C152 99 168 86 178 60" fill="none" stroke="#ffffff" strokeOpacity="0.23" strokeWidth="5" />
 
           <path
             d="M79 52 C55 52 45 76 56 94 C64 106 79 110 96 99"
@@ -1259,55 +1328,85 @@ function PodiumSection({ rows }) {
             stroke={`url(#${glossId})`}
             strokeWidth="4"
             strokeLinecap="round"
-            opacity="0.65"
+            opacity="0.67"
           />
 
           <rect x="118" y="133" width="24" height="25" rx="6" fill={`url(#${stemId})`} stroke={tone.edge} strokeWidth="2.1" />
           <rect x="101" y="156" width="58" height="16" rx="5" fill={`url(#${baseId})`} stroke={tone.edge} strokeWidth="2.1" />
           <rect x="88" y="172" width="84" height="19" rx="5" fill={`url(#${baseId})`} stroke={tone.edge} strokeWidth="2.1" />
 
-          <rect x="108" y="83" width="44" height="25" rx="12.5" fill="#ffffff" fillOpacity="0.1" stroke="#ffffff" strokeOpacity="0.2" />
-          <circle cx="130" cy="95.5" r="6" fill={`url(#${rimId})`} opacity="0.9" />
+          <rect x="108" y="83" width="44" height="25" rx="12.5" fill="#ffffff" fillOpacity="0.11" stroke="#ffffff" strokeOpacity="0.22" />
+          <circle cx="130" cy="95.5" r="6" fill={`url(#${rimId})`} opacity="0.93" />
         </g>
       </svg>
     );
   };
 
   return (
-    <section className="mt-10 rounded-2xl border border-[#4b3550] bg-[radial-gradient(circle_at_50%_8%,rgba(220,170,89,0.18)_0%,rgba(39,24,44,0.92)_45%,rgba(18,11,22,0.98)_100%)] p-4 shadow-[0_22px_58px_rgba(0,0,0,0.5)] sm:p-6">
-      <div className="mb-5 flex items-center justify-between gap-2">
-        <h3 className="text-[clamp(1.08rem,1.35vw,1.32rem)] font-bold text-[#f8f2e8]">Startup Winners Podium</h3>
-        <span className="rounded-full border border-[#8f6d35] bg-[#2e2118] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#efd3a2]">
-          royal top 3
-        </span>
-      </div>
-
-      <div className="rounded-2xl border border-[#5a3d30] bg-[linear-gradient(180deg,rgba(28,18,20,0.92)_0%,rgba(16,10,12,0.96)_100%)] px-3 pb-4 pt-6 shadow-[inset_0_1px_0_rgba(255,216,153,0.12),inset_0_-1px_0_rgba(123,60,20,0.2)] sm:px-5 sm:pb-6">
-        <div className="grid grid-cols-3 items-end gap-2 sm:gap-5">
-          {podium.map(({ position, startup }) => (
-            <article
-              key={`${position}-${startup.startup}`}
-              className={`flex h-full w-full flex-col items-center justify-end ${position === 1 ? "sm:-translate-y-2" : ""}`}
-            >
-              <div className="mb-2 h-24 w-28 sm:h-28 sm:w-32">
-                <RoyalCup position={position} />
-              </div>
-
-              <p className="max-w-[12ch] truncate text-center text-[clamp(1.15rem,1.95vw,1.72rem)] font-black tracking-[-0.015em] text-[#fffaf2] [text-shadow:0_2px_12px_rgba(0,0,0,0.35)]">
-                {startup.startup}
-              </p>
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#ebc48f]">{placeLabels[position]}</p>
-
-              <div className={`relative w-full max-w-[220px] rounded-t-xl border ${podiumTone[position]} grid place-content-center overflow-hidden`}>
-                <div className="absolute inset-x-0 top-0 h-10 bg-[linear-gradient(180deg,rgba(255,224,168,0.2)_0%,rgba(255,224,168,0)_100%)]" />
-                <div className="absolute inset-x-0 bottom-0 h-[2px] bg-[linear-gradient(90deg,rgba(247,196,112,0)_0%,rgba(247,196,112,0.9)_50%,rgba(247,196,112,0)_100%)]" />
-                <span className="relative text-[clamp(2rem,4vw,3.2rem)] font-black text-[#f4ca78] [text-shadow:0_2px_0_rgba(96,47,0,0.9)]">
-                  {position}
-                </span>
-              </div>
-            </article>
-          ))}
+    <section className="mt-10 rounded-[28px] border border-[#6f5245] bg-[radial-gradient(circle_at_50%_0%,rgba(140,50,37,0.28)_0%,rgba(42,17,24,0.94)_42%,rgba(19,11,18,0.99)_100%)] px-4 pb-5 pt-7 shadow-[0_26px_72px_rgba(0,0,0,0.58)] sm:px-6 sm:pb-7 sm:pt-8">
+      <div className="-mx-4 -mt-7 mb-6 overflow-hidden rounded-t-[28px] border-b border-[#8d3436] bg-[linear-gradient(90deg,#32040b_0%,#5a0b15_12%,#8f1825_28%,#cf3544_50%,#8f1825_72%,#5a0b15_88%,#32040b_100%)] shadow-[0_10px_26px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,220,220,0.14),inset_0_22px_34px_rgba(255,150,150,0.12)] sm:-mx-6 sm:-mt-8 sm:mb-8">
+        <div className="flex min-h-[4.75rem] flex-wrap items-center justify-center gap-3 px-4 text-center sm:min-h-[5.25rem] sm:gap-4">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0.08)_100%)] px-3 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[#f8fbff] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_10px_24px_rgba(0,0,0,0.16)] backdrop-blur-md">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#22c55e] shadow-[0_0_12px_rgba(34,197,94,0.85)]" />
+            LIVE MRR
+          </span>
+          <h3 className="text-[clamp(1.22rem,2vw,1.95rem)] font-black uppercase tracking-[0.01em] text-[#fff8f4]">
+            TOP RealMRR STARTUP WINNERS
+          </h3>
         </div>
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-end sm:gap-4 lg:gap-6">
+        {podium.map(({ position, startup }) => (
+          <article
+            key={`${position}-${startup.startup}`}
+            className={`flex h-full w-full flex-col items-center justify-end ${position === 1 ? "lg:-translate-y-2" : ""}`}
+          >
+            <div className={`mb-1 h-20 w-24 sm:h-28 sm:w-36 lg:mb-2 lg:h-32 lg:w-40 ${position === 1 ? "sm:h-32 sm:w-40 lg:h-36 lg:w-44" : ""}`}>
+              <RoyalCup position={position} />
+            </div>
+
+            <p className="mb-4 max-w-[12ch] text-center text-[clamp(1.24rem,1.95vw,2.28rem)] font-black leading-[0.95] tracking-[-0.025em] text-[#fff8ef] [text-shadow:0_4px_18px_rgba(0,0,0,0.42)]">
+              {startup.startup}
+            </p>
+
+            <div className={`relative mx-auto h-[13.2rem] w-full overflow-hidden rounded-[22px] p-[3.5px] ${position === 1 ? "max-w-[20.5rem] sm:h-[16.6rem] lg:h-[18.6rem]" : "max-w-[19rem] sm:h-[14.2rem] lg:h-[15.8rem]"} ${podiumFrameTone[position]}`}>
+              <div className={`relative h-full w-full overflow-hidden rounded-[18px] ${podiumTone[position]}`}>
+              <div className="absolute inset-x-0 top-0 h-14 bg-[linear-gradient(180deg,rgba(255,223,176,0.32)_0%,rgba(255,223,176,0)_100%)]" />
+              <div className="absolute inset-x-0 bottom-0 h-[2px] bg-[linear-gradient(90deg,rgba(247,196,112,0)_0%,rgba(247,196,112,0.9)_50%,rgba(247,196,112,0)_100%)]" />
+
+              <div className="relative z-10 flex h-full w-full items-center justify-center px-3 py-3 sm:px-4 sm:py-4 lg:py-5">
+                {position === 1 ? (
+                  <div className="mx-auto flex h-full min-h-0 w-[92%] max-w-[18.6rem] flex-col items-center px-4 pb-4 pt-6 text-center sm:pt-8 lg:pt-10">
+                    <div className="mt-2 flex items-start justify-center leading-none text-[#fff2bc]">
+                      <span className="text-[clamp(3.15rem,5.7vw,4.3rem)] font-black">{position}</span>
+                      <sup className="ml-1 pt-2 text-[clamp(1.28rem,2.02vw,1.78rem)] font-black lowercase">{suffixes[position]}</sup>
+                    </div>
+                    <span className="mt-2 text-[clamp(0.98rem,1.62vw,1.48rem)] font-black tracking-[0.04em] text-[#fff2bc]">POSITION</span>
+                    <div className="mt-auto flex w-full items-center justify-center pt-4">
+                      <div className="mx-auto inline-flex w-[82%] max-w-[15.5rem] items-center justify-center rounded-full border border-white/70 bg-[linear-gradient(180deg,#ffffff_0%,#f4fbff_100%)] px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_10px_22px_rgba(0,0,0,0.1)] backdrop-blur-md">
+                        <AutoFitPillValue                           value={startup.mrr}                           minSizePx={15}                           maxSizePx={34}                           laptopMinSizePx={21}                           laptopMaxSizePx={44}                           className="whitespace-nowrap text-center font-black leading-none tracking-[-0.01em] bg-[linear-gradient(180deg,#22c55e_0%,#16a34a_45%,#15803d_100%)] bg-clip-text text-transparent"                         />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex h-full w-full flex-col items-center pt-4 text-center sm:pt-6 lg:pt-8">
+                    <div className={`mt-2 flex items-start justify-center leading-none ${podiumTextTone[position]}`}>
+                      <span className="text-[clamp(2.95rem,5.05vw,4rem)] font-black">{position}</span>
+                      <sup className="ml-1 pt-2 text-[clamp(1.12rem,1.82vw,1.62rem)] font-black lowercase">{suffixes[position]}</sup>
+                    </div>
+                    <span className={`text-[clamp(0.88rem,1.42vw,1.26rem)] font-black tracking-[0.04em] ${podiumTextTone[position]}`}>POSITION</span>
+                    <div className="mt-auto flex w-full items-center justify-center pt-4">
+                      <div className="mx-auto inline-flex w-[82%] max-w-[15.5rem] items-center justify-center rounded-full border border-white/70 bg-[linear-gradient(180deg,#ffffff_0%,#f4fbff_100%)] px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_10px_22px_rgba(0,0,0,0.1)] backdrop-blur-md">
+                        <AutoFitPillValue                           value={startup.mrr}                           minSizePx={13}                           maxSizePx={28}                           className="whitespace-nowrap text-center font-black leading-none tracking-[-0.01em] bg-[linear-gradient(180deg,#22c55e_0%,#16a34a_45%,#15803d_100%)] bg-clip-text text-transparent"                         />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            </div>
+          </article>
+        ))}
       </div>
     </section>
   );
@@ -1377,7 +1476,7 @@ function Section({ title, items, onSelectStartup }) {
     <section className="mt-10">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="inline-flex items-center gap-2 rounded-md bg-[#1a1f2a] px-3 py-1 text-[clamp(1.05rem,1.2vw,1.3rem)] font-semibold text-[#f4f7ff] shadow-[inset_0_0_0_1px_#2c3b57]">{title}</h3>
-        <a href="#" className="text-xs text-gray-300 hover:text-white">View all â€º</a>
+        <a href="#" className="text-xs text-gray-300 hover:text-white">View all ›</a>
       </div>
 
       <div className="relative overflow-hidden">
@@ -1621,45 +1720,20 @@ export default function App() {
             ) : (
               <>
                 <section className="pb-5 pt-4 text-center sm:pt-8 lg:pt-10">
-                  <div className="mx-auto mb-5 flex w-full max-w-[980px] flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#3b5075]/85 bg-[linear-gradient(130deg,rgba(10,16,28,0.9)_0%,rgba(8,13,24,0.94)_100%)] px-4 py-3 shadow-[0_0_0_1px_rgba(141,173,230,0.24),0_22px_54px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(201,221,255,0.15)] backdrop-blur-xl sm:flex-nowrap">
-                    <div className="inline-flex items-center gap-2 text-[clamp(1.25rem,1.4vw,1.65rem)] font-bold">
+                  <div className="mx-auto -mt-5 mb-5 flex w-full max-w-[980px] items-center justify-center gap-3 rounded-2xl border border-[#3b5075]/85 bg-[linear-gradient(130deg,rgba(10,16,28,0.9)_0%,rgba(8,13,24,0.94)_100%)] px-4 py-3 shadow-[0_0_0_1px_rgba(141,173,230,0.24),0_22px_54px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(201,221,255,0.15)] backdrop-blur-xl sm:-mt-8 lg:-mt-10">
+                    <div className="inline-flex items-center justify-center gap-2 text-[clamp(1.25rem,1.4vw,1.65rem)] font-bold">
                       <CheckCircle2 className="text-[#22c55e]" size={34} strokeWidth={2.5} />
                       <span className={isLight ? "text-[#1f2937]" : "text-gray-300"}>RealMRR</span>
                     </div>
-
-                    <div className="flex flex-wrap items-center justify-end gap-3">
-                      <button
-                        type="button"
-                        onClick={openBuyStartupsPage}
-                        className="group relative overflow-hidden rounded-2xl border border-[#bcecff]/85 bg-[linear-gradient(120deg,#1cb2ff_0%,#3d7dff_50%,#34d7c8_100%)] px-6 py-2.5 text-[clamp(0.95rem,1vw,1.05rem)] font-extrabold text-white shadow-[0_0_0_1px_rgba(142,222,255,0.45),0_4px_14px_rgba(58,160,255,0.22)] transition duration-200 hover:-translate-y-0.5 hover:brightness-110"
-                      >
-                        <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.38)_0%,transparent_55%)] opacity-80" />
-                        <span className="relative">Buy Profitable Startups</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={openSellStartupPage}
-                        className="group relative overflow-hidden rounded-2xl border border-[#ffd7b8]/85 bg-[linear-gradient(120deg,#ff9a7a_0%,#ec5bb8_48%,#8f55ff_100%)] px-6 py-2.5 text-[clamp(0.95rem,1vw,1.05rem)] font-extrabold text-white shadow-[0_0_0_1px_rgba(255,183,140,0.4),0_4px_14px_rgba(215,88,175,0.22)] transition duration-200 hover:-translate-y-0.5 hover:brightness-110"
-                      >
-                        <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35)_0%,transparent_58%)] opacity-85" />
-                        <span className="relative">Sell Your Startup</span>
-                      </button>
-                    </div>
                   </div>
-                  <h1 className={`${isLight ? "text-[#0f172a]" : "text-gray-100"} mx-auto mt-4 max-w-[980px] text-[clamp(1.95rem,3.9vw,3.35rem)] font-bold leading-[1.08] tracking-[-0.02em]`}>
-                    The database of verified startup revenues
+                  <h1 className={`${isLight ? "text-[#0f172a]" : "text-gray-100"} mx-auto mt-4 max-w-[980px] text-[clamp(1.68rem,3.2vw,2.8rem)] font-bold leading-[1.08] tracking-[-0.02em]`}>
+                    <span className="block">Use this platform as social proof</span>
+                    <span className="block">to showcase your</span>
+                    <span className="block">
+                      RealMRR <span role="img" aria-label="rocket">??</span>
+                    </span>
                   </h1>
-
-                  <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5 sm:flex-nowrap">
-                    <label className={`${isLight ? "border-[#ced6e1] bg-[#ffffffcc]" : "border-[#2d2d2d] bg-[#1b1b1bd9]"} flex w-[min(62vw,460px)] min-w-[240px] items-center gap-2 rounded-xl border px-3.5 py-0.5 backdrop-blur-md`}>
-                      <Search size={16} className="text-gray-500" />
-                      <input
-                        className={`${isLight ? "text-[#111827]" : "text-gray-100"} w-full border-0 bg-transparent py-2.5 text-[clamp(0.88rem,0.92vw,0.98rem)] outline-none`}
-                        placeholder='"SaaS over $10K/mo"'
-                      />
-                    </label>
-
+                  <div className="mt-8 flex items-center justify-center">
                     <button
                       type="button"
                       onClick={() => {
@@ -1671,25 +1745,41 @@ export default function App() {
                         setIsAddStartupPage(true);
                         window.location.hash = "add-startup";
                       }}
-                      className="relative shrink-0 overflow-hidden rounded-xl border border-white/95 bg-[linear-gradient(120deg,#88deff_0%,#3d86ff_48%,#6c54ff_100%)] px-6 py-2.5 text-[clamp(0.9rem,0.94vw,0.98rem)] font-semibold text-white ring-1 ring-white/80 shadow-[0_0_0_1px_rgba(255,255,255,0.45),0_0_26px_rgba(156,205,255,0.65),0_12px_30px_rgba(66,116,255,0.45)] transition duration-200 hover:brightness-110 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.65),0_0_34px_rgba(171,217,255,0.8),0_16px_36px_rgba(86,101,255,0.55)] animate-[pulse_2.4s_ease-in-out_infinite]"
+                      className="animated-outline-button relative shrink-0 overflow-hidden rounded-xl border border-white/40 bg-[linear-gradient(120deg,#88deff_0%,#3d86ff_48%,#6c54ff_100%)] px-6 py-2.5 text-[clamp(0.9rem,0.94vw,0.98rem)] font-semibold text-white ring-1 ring-white/60 shadow-[0_0_0_1px_rgba(255,255,255,0.34),0_0_26px_rgba(156,205,255,0.65),0_12px_30px_rgba(66,116,255,0.45)] transition duration-200 hover:brightness-110 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.48),0_0_34px_rgba(171,217,255,0.8),0_16px_36px_rgba(86,101,255,0.55)]"
                     >
-                      + Add startup
+                      <span className="relative z-10">+ Add startup</span>
                     </button>
                   </div>
-
-                  <nav className="mt-4 flex flex-wrap items-center justify-center gap-2">
-                    {["New", "Stats", "Acquisition", "Co-founders", "$1 vs $1,000,000"].map((item) => (
-                      <button
-                        key={item}
-                        type="button"
-                        className="rounded-full border border-[#32405d] bg-[#141d2d]/65 px-3.5 py-1.5 text-[clamp(0.82rem,0.9vw,0.92rem)] text-[#b5c3df] transition hover:border-[#4f74bc] hover:text-[#dbe8ff]"
-                      >
-                        {item}
-                      </button>
-                    ))}
-                  </nav>
                 </section>
                 <PodiumSection rows={leaderboard} />
+                <section className="mt-6">
+                  <div className="mx-auto flex w-full max-w-[1180px] flex-wrap items-center justify-between gap-3 rounded-[26px] border border-[#3b5075]/85 bg-[linear-gradient(130deg,rgba(10,16,28,0.92)_0%,rgba(8,13,24,0.96)_100%)] px-5 py-4 shadow-[0_0_0_1px_rgba(141,173,230,0.24),0_22px_54px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(201,221,255,0.15)] backdrop-blur-xl sm:flex-nowrap">
+                    <div className="inline-flex items-center gap-3 text-[clamp(1.45rem,1.8vw,2rem)] font-bold">
+                      <CheckCircle2 className="text-[#22c55e]" size={36} strokeWidth={2.5} />
+                      <span className={isLight ? "text-[#1f2937]" : "text-gray-300"}>RealMRR</span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-end gap-3">
+                      <button
+                        type="button"
+                        onClick={openBuyStartupsPage}
+                        className="group relative overflow-hidden rounded-[22px] border border-[#bcecff]/85 bg-[linear-gradient(120deg,#1cb2ff_0%,#3d7dff_50%,#34d7c8_100%)] px-8 py-3 text-[clamp(1rem,1.08vw,1.14rem)] font-extrabold text-white shadow-[0_0_0_1px_rgba(142,222,255,0.45),0_6px_18px_rgba(58,160,255,0.24)] transition duration-200 hover:-translate-y-0.5 hover:brightness-110"
+                      >
+                        <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.38)_0%,transparent_55%)] opacity-80" />
+                        <span className="relative">Buy Profitable Startups</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={openSellStartupPage}
+                        className="group relative overflow-hidden rounded-[22px] border border-[#ffd7b8]/85 bg-[linear-gradient(120deg,#ff9a7a_0%,#ec5bb8_48%,#8f55ff_100%)] px-8 py-3 text-[clamp(1rem,1.08vw,1.14rem)] font-extrabold text-white shadow-[0_0_0_1px_rgba(255,183,140,0.4),0_6px_18px_rgba(215,88,175,0.24)] transition duration-200 hover:-translate-y-0.5 hover:brightness-110"
+                      >
+                        <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35)_0%,transparent_58%)] opacity-85" />
+                        <span className="relative">Sell Your Startup</span>
+                      </button>
+                    </div>
+                  </div>
+                </section>
                 <LeaderboardTable rows={leaderboard} onSelectStartup={openStartup} />
                 <div id="home-marketplace">
                   <Section title="Recently listed" items={recentlyListed} onSelectStartup={openStartup} />
@@ -1742,6 +1832,40 @@ export default function App() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

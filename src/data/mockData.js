@@ -138,7 +138,7 @@ export const bestDeals = bestDealsSeed.map((item) => ({
 }));
 
 const seedLeaderboard = [
-  { startup: "Stan", startupTag: "Stan enables people to make a living with AI tutors", founder: "Vitali Dodonov", mrr: 3554837, growth: "up", growthPct: "18%" },
+  { startup: "Tri-Tech", startupTag: "Tri-Tech enables people to make a living with AI tutors", founder: "Vitali Dodonov", mrr: 950000, growth: "up", growthPct: "18%" },
   { startup: "PulseCRM", startupTag: "CRM workflows for founders and growth teams", founder: "Nora West", mrr: 828647, growth: "up", growthPct: "12%" },
   { startup: "TrimRx", startupTag: "Telehealth workflows for modern clinics", founder: "Cris", mrr: 756922, growth: "down", growthPct: "6%" },
   { startup: "Rezi", startupTag: "Resume tools used by thousands of job seekers", founder: "Jacob Jacquet", mrr: 287921, growth: "flat", growthPct: "0%", forSale: true },
