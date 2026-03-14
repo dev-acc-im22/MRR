@@ -15,6 +15,7 @@ import {
   Eye,
   ExternalLink,
   Globe2,
+  Heart,
   Home,
   Megaphone,
   Moon,
@@ -93,6 +94,21 @@ function toInitials(name) {
     .slice(0, 2)
     .map((part) => part[0].toUpperCase())
     .join("");
+}
+
+function buildAnonymousId(apiKey, handle) {
+  if (typeof window === "undefined") return "AMRR-LOCAL";
+
+  const storageKey = "realmrr-anon-seed";
+  let seed = window.localStorage.getItem(storageKey);
+  if (!seed) {
+    seed = Math.random().toString(36).slice(2, 8).toUpperCase();
+    window.localStorage.setItem(storageKey, seed);
+  }
+
+  const raw = `${seed}|${apiKey || ""}|${handle || ""}`;
+  const code = hashText(raw).toString(36).toUpperCase().padStart(6, "0").slice(0, 6);
+  return `AMRR-${code}`;
 }
 
 function hashText(text) {
@@ -314,6 +330,31 @@ function AddStartupPage({ onClose }) {
   const [anonymousMode, setAnonymousMode] = useState(false);
   const [listForSale, setListForSale] = useState(false);
 
+  const anonymousId = useMemo(() => {
+    if (!anonymousMode) return "";
+    return buildAnonymousId(apiKey.trim(), xHandle.trim());
+  }, [anonymousMode, apiKey, xHandle]);
+
+  useEffect(() => {
+    if (!anonymousMode || !anonymousId) return;
+    try {
+      const recordsKey = "realmrr-anon-records";
+      const raw = window.localStorage.getItem(recordsKey);
+      const records = raw ? JSON.parse(raw) : {};
+      records[anonymousId] = {
+        id: anonymousId,
+        handle: xHandle.trim() || null,
+        createdAt: records[anonymousId]?.createdAt || new Date().toISOString(),
+        lastSeen: new Date().toISOString(),
+      };
+      window.localStorage.setItem(recordsKey, JSON.stringify(records));
+    } catch (err) {
+      // no-op: localStorage may be unavailable in private mode
+    }
+  }, [anonymousMode, anonymousId, xHandle]);
+
+
+
   useEffect(() => {
     const onKeyDown = (event) => {
       if (event.key === "Escape") onClose?.();
@@ -329,7 +370,7 @@ function AddStartupPage({ onClose }) {
       <div className="overflow-hidden rounded-2xl border border-[#31333a] bg-[linear-gradient(180deg,#2a2a2d_0%,#232427_100%)] shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
         <div className="border-b border-[#3a3d44]">
           <div className="flex items-center justify-between gap-3 border-b border-[#4b7fe0] bg-[linear-gradient(100deg,#1f4fa8_0%,#2f6fda_36%,#4b8df5_62%,#5ba8ff_100%)] px-6 py-5 shadow-[inset_0_-1px_0_rgba(167,210,255,0.35),0_0_24px_rgba(71,131,255,0.25)]">
-            <h3 className="text-[clamp(1.85rem,2.2vw,2.15rem)] font-bold tracking-[-0.02em] text-[#f3f5fa]">Add Your Startup</h3>
+            <h3 className="text-[clamp(1.85rem,2.2vw,2.15rem)] font-bold tracking-[-0.02em] text-[#f3f5fa]">Add Your Startup & Get FREE Visbililty</h3>
             <button
               type="button"
               aria-label="Close"
@@ -340,10 +381,20 @@ function AddStartupPage({ onClose }) {
             </button>
           </div>
           <div className="px-6 py-4">
-            <p className="max-w-[640px] rounded-xl border border-[#3e4a63] bg-[linear-gradient(135deg,rgba(52,66,95,0.28)_0%,rgba(37,45,63,0.38)_100%)] px-4 py-3 text-[clamp(1rem,1.02vw,1.1rem)] leading-relaxed text-gray-200 shadow-[inset_0_0_0_1px_rgba(130,156,206,0.08)]">
-              Showcase your verified revenue to <span className="text-[1.08em] font-semibold text-[#7fd0ff]">120,000+ monthly visitors</span> and get a
-              <span className="text-[1.08em] font-semibold text-[#7fd0ff]"> 54+ DR dofollow backlink</span>
-            </p>
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
+              <p className="w-full flex-1 rounded-xl border border-[#3e4a63] bg-[linear-gradient(135deg,rgba(52,66,95,0.28)_0%,rgba(37,45,63,0.38)_100%)] px-4 py-3 text-[clamp(1rem,1.02vw,1.1rem)] leading-relaxed text-gray-200 shadow-[inset_0_0_0_1px_rgba(130,156,206,0.08)]">
+                Showcase your verified revenue to <span className="text-[1.08em] font-semibold text-[#7fd0ff]">120,000+ monthly visitors</span> and get a
+                <span className="text-[1.08em] font-semibold text-[#7fd0ff]"> FREE 54+ DR dofollow backlink</span>
+              </p>
+
+              <div className="shrink-0 rounded-2xl border border-[#3b567f] bg-[#172640] px-4 py-3 text-xs font-semibold text-[#d8e6ff] shadow-[inset_0_0_0_1px_rgba(127,182,255,0.16)]">
+                <div className="flex items-center justify-end gap-2 uppercase tracking-[0.06em]">
+                  <span>Trusted</span>
+                  <Shield size={14} className="text-[#7fd0ff]" />
+                </div>
+                <div className="mt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#cfe0ff]">List for Free</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -405,7 +456,7 @@ function AddStartupPage({ onClose }) {
               />
             </div>
 
-            <label className="inline-flex items-center gap-2.5 text-[clamp(1rem,1.04vw,1.1rem)] text-gray-200">
+            <label className="inline-flex items-center gap-2 text-[clamp(1rem,1.04vw,1.1rem)] text-gray-200">
               <input
                 type="checkbox"
                 checked={anonymousMode}
@@ -414,6 +465,18 @@ function AddStartupPage({ onClose }) {
               />
               <span>Anonymous mode</span>
             </label>
+
+            {anonymousMode ? (
+              <div className="rounded-xl border border-[#3c3f47] bg-[#181a1f] p-3 text-[clamp(0.92rem,0.98vw,1rem)] text-gray-300">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-semibold text-[#e5edf9]">Anonymous profile enabled</p>
+                  <span className="rounded-full border border-[#4a6aa5] bg-[#1a2b45] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-[#d8e6ff]">
+                    ID: {anonymousId || "AMRR-XXXXXX"}
+                  </span>
+                </div>
+                <p className="mt-2 text-xs text-[#b3b7c4]">We will display your listing as Anonymous on the public marketplace. Your original handle is stored privately for verification.</p>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -559,7 +622,7 @@ function SellStartupsPage({ onClose }) {
   return (
     <section className="pt-4 sm:pt-8">
       <div className="overflow-hidden rounded-[26px] border border-[#6a4060]/70 bg-[linear-gradient(180deg,rgba(23,14,27,0.9)_0%,rgba(17,12,23,0.95)_100%)] shadow-[0_0_0_1px_rgba(221,157,191,0.12),0_24px_70px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,214,234,0.12)] backdrop-blur-xl">
-        <div className="border-b border-[#52354a] p-5 sm:p-6">
+        <div className="border-b border-[#52354a] p-5 sm:p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <button
               type="button"
@@ -728,7 +791,7 @@ function SellStartupsPage({ onClose }) {
     </section>
   );
 }
-function BuyStartupsPage({ onClose, listings, onSelectStartup }) {
+function AcquireStartupsPage({ onClose, listings, onSelectStartup }) {
   const sectors = ["All", "SaaS", "AI", "Fintech", "Developer Tools", "Marketing", "E-commerce"];
   const [activeSector, setActiveSector] = useState("All");
 
@@ -738,6 +801,9 @@ function BuyStartupsPage({ onClose, listings, onSelectStartup }) {
   }, [activeSector, listings]);
 
   const displayListings = filteredListings.slice(0, 12);
+  const saleListings = listings.filter((item) => item.forSale);
+  const featuredListings = (saleListings.length ? saleListings : filteredListings).slice(0, 2);
+  const allSaleListings = saleListings.length ? saleListings : filteredListings;
 
   const medianMrr = useMemo(() => {
     if (!filteredListings.length) return "$0";
@@ -786,12 +852,12 @@ function BuyStartupsPage({ onClose, listings, onSelectStartup }) {
 
           <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7fb6ff]">RealMRR Buyers</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7fb6ff]">acquire startups</p>
               <h1 className="mt-2 text-[clamp(1.7rem,3.5vw,2.8rem)] font-bold leading-[1.08] text-white">
-                Buy profitable startups with verified recurring revenue.
+                Acquire startups with verified recurring revenue.
               </h1>
               <p className="mt-3 max-w-[740px] text-sm leading-6 text-[#9cb0d1] sm:text-base">
-                Inspired by modern acquisition marketplaces, but built for transparent MRR-first deals. Browse vetted businesses,
+                A combined buy-and-acquire flow built for transparent MRR-first deals. Browse vetted businesses,
                 compare performance snapshots, and connect with founders in minutes.
               </p>
 
@@ -836,42 +902,253 @@ function BuyStartupsPage({ onClose, listings, onSelectStartup }) {
           </div>
         </div>
 
-        <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3">
-          {displayListings.map((item, idx) => (
-            <article
-              key={`${item.name}-${item.category}-${idx}`}
-              className="rounded-xl border border-[#2a3751] bg-[#101623] p-4 shadow-[0_8px_20px_rgba(0,0,0,0.25)]"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate text-base font-semibold text-[#eef4ff]">{item.name}</p>
-                  <p className="mt-1 truncate text-xs text-[#9cb0d1]">{item.niche || "Profitable internet business"}</p>
+        <div className="grid gap-4 p-4 lg:grid-cols-[clamp(240px,26vw,320px)_minmax(0,1fr)]">
+          <aside className="rounded-2xl border border-[#2a3751] bg-[#0f1624] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.28)]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7fb6ff]">Filters</p>
+
+            <div className="mt-4 space-y-4 text-sm text-[#c7d6f3]">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#91a7cf]">Categories</p>
+                <div className="mt-2 relative">
+                  <select
+                    className="w-full rounded-lg border border-[#2b3952] bg-[#0c1321] px-3 py-2 text-xs text-[#dbe7ff] outline-none"
+                    value={activeSector}
+                    onChange={(event) => setActiveSector(event.target.value)}
+                  >
+                    {sectors.map((sector) => (
+                      <option key={`filter-${sector}`} value={sector}>
+                        {sector}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <span className="rounded-md border border-[#355080] bg-[#16233b] px-2 py-1 text-[10px] font-semibold text-[#aaccff]">
-                  {item.category || "SaaS"}
-                </span>
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-                <div className="rounded-lg border border-[#273349] bg-[#0c1321] p-2.5">
-                  <p className="text-[#7f95bc]">MRR</p>
-                  <p className="mt-1 font-semibold text-[#e8f0ff]">{item.revenue || item.price || "$0"}</p>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#91a7cf]">Monthly Revenue</p>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    placeholder="$ Min"
+                    className="rounded-lg border border-[#2b3952] bg-[#0c1321] px-3 py-2 text-xs text-[#dbe7ff] placeholder:text-[#6f7f9a]"
+                  />
+                  <input
+                    type="text"
+                    placeholder="$ Max"
+                    className="rounded-lg border border-[#2b3952] bg-[#0c1321] px-3 py-2 text-xs text-[#dbe7ff] placeholder:text-[#6f7f9a]"
+                  />
                 </div>
-                <div className="rounded-lg border border-[#273349] bg-[#0c1321] p-2.5">
-                  <p className="text-[#7f95bc]">Multiple</p>
-                  <p className="mt-1 font-semibold text-[#e8f0ff]">{item.multiple || "3.0x"}</p>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#91a7cf]">Growth (30d)</p>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    placeholder="Min %"
+                    className="rounded-lg border border-[#2b3952] bg-[#0c1321] px-3 py-2 text-xs text-[#dbe7ff] placeholder:text-[#6f7f9a]"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Max %"
+                    className="rounded-lg border border-[#2b3952] bg-[#0c1321] px-3 py-2 text-xs text-[#dbe7ff] placeholder:text-[#6f7f9a]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#91a7cf]">Asking Price</p>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    placeholder="$ Min"
+                    className="rounded-lg border border-[#2b3952] bg-[#0c1321] px-3 py-2 text-xs text-[#dbe7ff] placeholder:text-[#6f7f9a]"
+                  />
+                  <input
+                    type="text"
+                    placeholder="$ Max"
+                    className="rounded-lg border border-[#2b3952] bg-[#0c1321] px-3 py-2 text-xs text-[#dbe7ff] placeholder:text-[#6f7f9a]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#91a7cf]">Max Multiple</p>
+                <select
+                  className="mt-2 w-full rounded-lg border border-[#2b3952] bg-[#0c1321] px-3 py-2 text-xs text-[#dbe7ff] outline-none"
+                  defaultValue="Any multiple"
+                >
+                  <option>Any multiple</option>
+                  <option>1x - 3x</option>
+                  <option>3x - 5x</option>
+                  <option>5x+</option>
+                </select>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#91a7cf]">Profit Margin</p>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    placeholder="Min %"
+                    className="rounded-lg border border-[#2b3952] bg-[#0c1321] px-3 py-2 text-xs text-[#dbe7ff] placeholder:text-[#6f7f9a]"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Max %"
+                    className="rounded-lg border border-[#2b3952] bg-[#0c1321] px-3 py-2 text-xs text-[#dbe7ff] placeholder:text-[#6f7f9a]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#91a7cf]">Mobile App</p>
+                <select
+                  className="mt-2 w-full rounded-lg border border-[#2b3952] bg-[#0c1321] px-3 py-2 text-xs text-[#dbe7ff] outline-none"
+                  defaultValue="Any"
+                >
+                  <option>Any</option>
+                  <option>iOS</option>
+                  <option>Android</option>
+                  <option>Web</option>
+                </select>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#91a7cf]">Listed</p>
+                <select
+                  className="mt-2 w-full rounded-lg border border-[#2b3952] bg-[#0c1321] px-3 py-2 text-xs text-[#dbe7ff] outline-none"
+                  defaultValue="Any time"
+                >
+                  <option>Any time</option>
+                  <option>Last 7 days</option>
+                  <option>Last 30 days</option>
+                  <option>Last 90 days</option>
+                </select>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#91a7cf]">Founded</p>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    placeholder="From"
+                    className="rounded-lg border border-[#2b3952] bg-[#0c1321] px-3 py-2 text-xs text-[#dbe7ff] placeholder:text-[#6f7f9a]"
+                  />
+                  <input
+                    type="text"
+                    placeholder="To"
+                    className="rounded-lg border border-[#2b3952] bg-[#0c1321] px-3 py-2 text-xs text-[#dbe7ff] placeholder:text-[#6f7f9a]"
+                  />
                 </div>
               </div>
 
               <button
                 type="button"
-                onClick={() => onSelectStartup?.(item)}
-                className="mt-4 inline-flex w-full items-center justify-center rounded-lg border border-[#4e79c8] bg-[linear-gradient(120deg,#1c6dff_0%,#3c86ff_48%,#34c9bf_100%)] px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+                className="w-full rounded-lg border border-[#3b5a93] bg-[#13223a] px-3 py-2 text-xs font-semibold text-[#cfe0ff] transition hover:border-[#5d86d4] hover:text-white"
               >
-                View startup
+                Apply filters
               </button>
-            </article>
-          ))}
+            </div>
+          </aside>
+
+          <div className="grid gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#8fb5f2]">Featured deals</p>
+              <span className="text-xs text-[#9cb0d1]">{filteredListings.length.toLocaleString()} listings</span>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              {featuredListings.map((item, idx) => (
+                <article
+                  key={`featured-${item.name}-${idx}`}
+                  className="rounded-2xl border border-[#2a3751] bg-[#101623] p-5 shadow-[0_12px_28px_rgba(0,0,0,0.28)]"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-lg font-semibold text-[#eef4ff]">{item.name}</p>
+                      <p className="mt-1 truncate text-xs text-[#9cb0d1]">{item.niche || "Profitable internet business"}</p>
+                    </div>
+                    <span className="rounded-md border border-[#355080] bg-[#16233b] px-2 py-1 text-[10px] font-semibold text-[#aaccff]">
+                      {item.category || "SaaS"}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+                    <div className="rounded-lg border border-[#273349] bg-[#0c1321] p-2.5">
+                      <p className="text-[#7f95bc]">MRR</p>
+                      <p className="mt-1 font-semibold text-[#e8f0ff]">{item.revenue || item.price || "$0"}</p>
+                    </div>
+                    <div className="rounded-lg border border-[#273349] bg-[#0c1321] p-2.5">
+                      <p className="text-[#7f95bc]">Multiple</p>
+                      <p className="mt-1 font-semibold text-[#e8f0ff]">{item.multiple || "3.0x"}</p>
+                    </div>
+                    <div className="rounded-lg border border-[#273349] bg-[#0c1321] p-2.5">
+                      <p className="text-[#7f95bc]">Category</p>
+                      <p className="mt-1 font-semibold text-[#e8f0ff]">{item.category || "SaaS"}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => onSelectStartup?.(item)}
+                    className="mt-4 inline-flex w-full items-center justify-center rounded-lg border border-[#4e79c8] bg-[linear-gradient(120deg,#1c6dff_0%,#3c86ff_48%,#34c9bf_100%)] px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+                  >
+                    View startup
+                  </button>
+                </article>
+              ))}
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#8fb5f2]">All startups for sale</p>
+                <span className="text-xs text-[#9cb0d1]">{allSaleListings.length.toLocaleString()} listings</span>
+              </div>
+
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {allSaleListings.map((item, idx) => (
+                  <article
+                    key={`sale-${item.name}-${idx}`}
+                    className="rounded-2xl border border-[#24324a] bg-[#0c1524] p-4 shadow-[0_10px_26px_rgba(0,0,0,0.28)]"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-base font-semibold text-[#eef4ff]">{item.name}</p>
+                        <p className="mt-1 truncate text-xs text-[#9cb0d1]">{item.niche || "Profitable internet business"}</p>
+                      </div>
+                      <span className="rounded-md border border-[#355080] bg-[#16233b] px-2 py-1 text-[10px] font-semibold text-[#aaccff]">
+                        {item.category || "SaaS"}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+                      <div className="rounded-lg border border-[#273349] bg-[#0c1321] p-2.5">
+                        <p className="text-[#7f95bc]">MRR</p>
+                        <p className="mt-1 font-semibold text-[#e8f0ff]">{item.revenue || item.price || item.mrr || "$0"}</p>
+                      </div>
+                      <div className="rounded-lg border border-[#273349] bg-[#0c1321] p-2.5">
+                        <p className="text-[#7f95bc]">Price</p>
+                        <p className="mt-1 font-semibold text-[#e8f0ff]">{item.price || item.revenue || "$0"}</p>
+                      </div>
+                      <div className="rounded-lg border border-[#273349] bg-[#0c1321] p-2.5">
+                        <p className="text-[#7f95bc]">Multiple</p>
+                        <p className="mt-1 font-semibold text-[#e8f0ff]">{item.multiple || "3.0x"}</p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => onSelectStartup?.(item)}
+                      className="mt-4 inline-flex w-full items-center justify-center rounded-lg border border-[#4e79c8] bg-[linear-gradient(120deg,#1c6dff_0%,#3c86ff_48%,#34c9bf_100%)] px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+                    >
+                      View startup
+                    </button>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="border-t border-[#24324a] px-5 py-4 sm:px-6">
@@ -889,6 +1166,96 @@ function BuyStartupsPage({ onClose, listings, onSelectStartup }) {
     </section>
   );
 }
+function TopNav({
+  isLight,
+  isNavMenuOpen,
+  setIsNavMenuOpen,
+  setTheme,
+  onHome,
+  onAdd,
+  onAcquire,
+  onSell,
+  onAdvertise,
+}) {
+  return (
+    <div className="relative">
+      <div className={`mx-auto mb-6 grid w-full max-w-[min(1200px,90vw)] grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border px-4 py-3 backdrop-blur-xl ${isLight ? "border-[#c9d6ea] bg-[linear-gradient(130deg,rgba(248,251,255,0.92)_0%,rgba(233,240,250,0.98)_100%)] shadow-[0_0_0_1px_rgba(120,140,170,0.2),0_12px_30px_rgba(20,30,60,0.12)]" : "border-[#3b5075]/85 bg-[linear-gradient(130deg,rgba(10,16,28,0.9)_0%,rgba(8,13,24,0.94)_100%)] shadow-[0_0_0_1px_rgba(141,173,230,0.24),0_22px_54px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(201,221,255,0.15)]"}`} >
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label="Toggle theme"
+            onClick={() => setTheme(isLight ? "dark" : "light")}
+            className={`group relative flex h-10 items-center gap-2 rounded-full border px-2 text-[10px] font-semibold uppercase tracking-[0.08em] transition ${isLight ? "border-[#c3d2ea] bg-white text-[#334155] shadow-[inset_0_0_0_1px_rgba(120,140,170,0.15)] hover:border-[#8aa6d8]" : "border-[#3b5075]/85 bg-[#0b1220]/80 text-[#cfe0ff] shadow-[inset_0_0_0_1px_rgba(141,173,230,0.12)] hover:border-[#5b7fc0]"}`}
+          >
+            <span className={`grid h-7 w-7 place-content-center rounded-full border ${isLight ? "border-[#f1d48a] bg-[#ffd974] text-[#4a3300]" : "border-[#2a436d]/80 bg-[#0f1b2d] text-[#cfe0ff]"}`}>
+              {isLight ? <Sun size={14} /> : <Moon size={14} />}
+            </span>
+            <span className="hidden sm:inline">{isLight ? "Light" : "Dark"}</span>
+          </button>
+        </div>
+
+        <button type="button" onClick={onHome} className="inline-flex items-center justify-center gap-2 text-[clamp(1.15rem,1.3vw,1.55rem)] font-bold">
+          <CheckCircle2 className="text-[#22c55e]" size={32} strokeWidth={2.5} />
+          <span className={isLight ? "text-[#1f2937]" : "text-gray-300"}>RealMRR</span>
+        </button>
+
+        <div className="flex items-center justify-end">
+          <button
+            type="button"
+            aria-label="Toggle menu"
+            aria-expanded={isNavMenuOpen}
+            onClick={() => setIsNavMenuOpen((prev) => !prev)}
+            className={`group relative grid h-11 w-11 place-content-center rounded-2xl border transition ${isLight ? "border-[#c3d2ea] bg-white text-[#334155] shadow-[inset_0_0_0_1px_rgba(120,140,170,0.15),0_6px_18px_rgba(20,30,60,0.12)] hover:border-[#8aa6d8]" : "border-[#3b5075]/85 bg-[#0b1220]/80 text-[#cfe0ff] shadow-[inset_0_0_0_1px_rgba(141,173,230,0.12),0_8px_22px_rgba(0,0,0,0.35)] hover:border-[#5b7fc0]"}`}
+          >
+            <span className="absolute inset-1 rounded-full border border-[#2a436d]/80" />
+            <span className="relative flex flex-col gap-[3px]">
+              <span className={`h-[2px] w-5 rounded-full bg-current transition ${isNavMenuOpen ? "translate-y-[5px] rotate-45" : ""}`} />
+              <span className={`h-[2px] w-5 rounded-full bg-current transition ${isNavMenuOpen ? "opacity-0" : ""}`} />
+              <span className={`h-[2px] w-5 rounded-full bg-current transition ${isNavMenuOpen ? "-translate-y-[5px] -rotate-45" : ""}`} />
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {isNavMenuOpen ? (
+        <div
+          className={`fixed inset-0 z-40 backdrop-blur-sm lg:absolute lg:inset-x-0 lg:top-[calc(100%+12px)] lg:mt-0 lg:bottom-auto lg:bg-transparent lg:backdrop-blur-0 ${isLight ? "bg-slate-200/75" : "bg-black/55"}`}
+          onClick={() => setIsNavMenuOpen(false)}
+        >
+          <div className="mx-auto flex h-full w-full max-w-[min(1200px,90vw)] items-center justify-center px-4 py-6 lg:h-auto lg:justify-start lg:py-0">
+            <div
+              className={`w-full max-w-[min(860px,88vw)] rounded-3xl border p-4 shadow-[0_30px_80px_rgba(0,0,0,0.35)] lg:mx-auto lg:w-[min(100vw,1200px)] ${isLight ? "border-[#c7d3e6] bg-[linear-gradient(140deg,rgba(248,251,255,0.98)_0%,rgba(232,240,250,0.96)_100%)]" : "border-[#3b5075]/85 bg-[linear-gradient(140deg,rgba(11,18,32,0.95)_0%,rgba(7,12,22,0.92)_100%)]"}`}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="mx-auto grid max-h-[80vh] w-full gap-4 overflow-y-auto text-center lg:text-left">
+                {[
+                  { label: "HOME", action: onHome },
+                  { label: "ADD STARTUP", action: onAdd },
+                  { label: "ACQUIRE/BUY STARTUPS", action: onAcquire },
+                  { label: "SELL STARTUP", action: onSell },
+                  { label: "ADVERTISE", action: onAdvertise },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => {
+                      item.action?.();
+                      setIsNavMenuOpen(false);
+                    }}
+                    className={`w-full rounded-2xl border border-transparent px-3 py-2.5 text-[clamp(1.05rem,1.8vw,1.6rem)] font-semibold uppercase tracking-[0.06em] transition ${isLight ? "text-[#1f2937] hover:border-[#9fb6df] hover:bg-[#e9f0fa]" : "text-[#e6f1ff] hover:border-[#5a7fc4] hover:bg-[#0f182a]"} drop-shadow-[0_1px_6px_rgba(60,90,140,0.2)]`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function DirectoryFooter({ isLight, theme, setTheme, onSelectCategory, activeCategory }) {
   return (
     <>
@@ -981,6 +1348,30 @@ function DirectoryFooter({ isLight, theme, setTheme, onSelectCategory, activeCat
 function StartupDetail({ profile, onBack, recommendations, onSelectStartup }) {
   return (
     <section className="pt-4 sm:pt-8">
+      <div className="mb-4 rounded-2xl border border-[#5b3a1b] bg-[linear-gradient(120deg,rgba(76,34,16,0.85)_0%,rgba(45,22,12,0.92)_100%)] px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-[13px] font-semibold text-[#f6d4b6]">
+            <ArrowLeft size={14} className="text-[#f7b277]" />
+            <span>This startup is for sale.</span>
+            <span className="text-[#ffd8b5]">Asking price: {profile.price || profile.mrr}</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button className="inline-flex items-center gap-2 rounded-lg border border-[#8f4a20] bg-[#2a1710] px-3 py-2 text-xs font-semibold text-[#ffc99a]">
+              <Heart size={13} />
+              Save
+            </button>
+            <button className="inline-flex items-center gap-2 rounded-lg border border-[#f4a460] bg-[#f0811f] px-3 py-2 text-xs font-semibold text-white">
+              <Share2 size={13} />
+              Contact Seller
+            </button>
+          </div>
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-[#f1caa5]">
+          <span className="rounded-full border border-[#6b3b20] bg-[#2a1911] px-2 py-1">1.2x revenue</span>
+          <span className="rounded-full border border-[#6b3b20] bg-[#2a1911] px-2 py-1">35 buyers saw this recently</span>
+        </div>
+      </div>
+
       <button
         type="button"
         onClick={onBack}
@@ -1083,7 +1474,7 @@ function StartupDetail({ profile, onBack, recommendations, onSelectStartup }) {
               onClick={() => onSelectStartup(item)}
               className="rounded-xl border border-[#2d333f] bg-[#141820] p-3 text-left transition hover:border-[#4760a8]"
             >
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <span className="grid h-9 w-9 place-content-center rounded-md border border-[#36507b] bg-[#21304a] text-[11px] font-bold text-[#8fb4ff]">
                   {item.logo}
                 </span>
@@ -1181,7 +1572,7 @@ function AutoFitPillValue({ value, className, minSizePx = 16, maxSizePx = 34, la
       <span
         ref={textRef}
         className={className}
-        style={{ fontSize: `${laptopMaxSizePx ?? maxSizePx}px` }}
+        style={{ fontSize: `${laptopMaxSizePx ?? maxSizePx}px`}}
       >
         {value}
       </span>
@@ -1522,10 +1913,12 @@ function Section({ title, items, onSelectStartup }) {
   );
 }
 
+
 export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem("realmrr-theme") || "dark");
   const [selectedStartup, setSelectedStartup] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [isNavMenuOpen, setIsNavMenuOpen] = useState(false);
   const [isAddStartupPage, setIsAddStartupPage] = useState(() =>
     typeof window !== "undefined" ? window.location.hash === "#add-startup" : false
   );
@@ -1535,8 +1928,8 @@ export default function App() {
   const [isSellStartupPage, setIsSellStartupPage] = useState(() =>
     typeof window !== "undefined" ? window.location.hash === "#sell-startups" : false
   );
-  const [isBuyStartupsPage, setIsBuyStartupsPage] = useState(() =>
-    typeof window !== "undefined" ? window.location.hash === "#buy-startups" : false
+  const [isAcquireStartupsPage, setIsAcquireStartupsPage] = useState(() =>
+    typeof window !== "undefined" ? window.location.hash === "#acquire-startups" : false
   );
   const isLight = theme === "light";
 
@@ -1551,7 +1944,7 @@ export default function App() {
       setIsAddStartupPage(hash === "#add-startup");
       setIsAdvertisePage(hash === "#advertise");
       setIsSellStartupPage(hash === "#sell-startups");
-      setIsBuyStartupsPage(hash === "#buy-startups");
+      setIsAcquireStartupsPage(hash === "#acquire-startups");
     };
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
@@ -1574,7 +1967,7 @@ export default function App() {
     setIsAddStartupPage(false);
     setIsAdvertisePage(false);
     setIsSellStartupPage(false);
-    setIsBuyStartupsPage(false);
+    setIsAcquireStartupsPage(false);
     setSelectedStartup(startup);
   };
 
@@ -1583,27 +1976,28 @@ export default function App() {
     setSelectedCategory(null);
     setIsAddStartupPage(false);
     setIsSellStartupPage(false);
-    setIsBuyStartupsPage(false);
+    setIsAcquireStartupsPage(false);
     setIsAdvertisePage(true);
     window.location.hash = "advertise";
   };
 
-  const openBuyStartupsPage = () => {
+  const openAcquireStartupsPage = () => {
     setSelectedStartup(null);
     setSelectedCategory(null);
     setIsAddStartupPage(false);
     setIsAdvertisePage(false);
     setIsSellStartupPage(false);
-    setIsBuyStartupsPage(true);
-    window.location.hash = "buy-startups";
+    setIsAcquireStartupsPage(true);
+    window.location.hash = "acquire-startups";
   };
+
 
   const openSellStartupPage = () => {
     setSelectedStartup(null);
     setSelectedCategory(null);
     setIsAddStartupPage(false);
     setIsAdvertisePage(false);
-    setIsBuyStartupsPage(false);
+    setIsAcquireStartupsPage(false);
     setIsSellStartupPage(true);
     window.location.hash = "sell-startups";
   };
@@ -1633,6 +2027,7 @@ export default function App() {
       multiple: row.growthPct,
       founder: row.founder,
       category: row.category,
+      anonymous: row.anonymous,
     }));
 
     return [...recentlyListed, ...bestDeals, ...listRows].map((item) => ({
@@ -1649,11 +2044,11 @@ export default function App() {
   }, [allStartupCards, selectedCategory]);
   return (
     <div className={`${isLight ? "bg-[#f4f7fb] text-[#0f172a]" : "bg-[#050608] text-gray-100"} min-h-screen lg:h-screen lg:overflow-hidden transition-colors duration-300`}>
-      <div className="mx-auto max-w-[1720px] px-4 pb-10 pt-6 lg:h-full lg:pt-8">
-        <div className="grid grid-cols-1 items-start gap-6 lg:h-full lg:grid-cols-[180px_minmax(0,1fr)_180px] xl:grid-cols-[200px_minmax(0,1fr)_200px]">
-          <aside className="order-2 grid gap-2.5 sm:grid-cols-2 lg:order-1 lg:sticky lg:top-2 lg:max-h-[calc(100vh-1rem)] lg:grid-cols-1 lg:overflow-hidden">
+      <div className="mx-auto max-w-[min(1920px,96vw)] px-4 pb-10 pt-6 lg:h-full lg:pt-8">
+        <div className="grid grid-cols-1 items-start gap-6 lg:h-full lg:grid-cols-[clamp(180px,16vw,260px)_minmax(0,1fr)_clamp(180px,16vw,260px)]">
+          <aside className="order-2 grid gap-2 sm:grid-cols-2 lg:order-1 lg:sticky lg:top-2 lg:max-h-[calc(100vh-1rem)] lg:grid-cols-1 lg:overflow-y-auto lg:overflow-x-hidden lg:pr-1 hide-scrollbar">
             <div className="sm:col-span-2 lg:col-span-1">
-                <p className="rounded-xl border border-[#3b4f74]/80 bg-[linear-gradient(110deg,rgba(22,33,52,0.85)_0%,rgba(13,22,36,0.88)_100%)] px-3 py-2 text-center text-[10px] font-semibold tracking-[0.08em] text-[#9fbef0] shadow-[inset_0_0_0_1px_rgba(151,187,245,0.12)]">
+                <p className={`rounded-xl border px-3 py-2 text-center text-[10px] font-semibold tracking-[0.08em] shadow-[inset_0_0_0_1px_rgba(151,187,245,0.12)] ${isLight ? "border-[#cbd5e1] bg-[linear-gradient(110deg,rgba(250,252,255,0.95)_0%,rgba(236,242,250,0.98)_100%)] text-[#334155]" : "border-[#3b4f74]/80 bg-[linear-gradient(110deg,rgba(22,33,52,0.85)_0%,rgba(13,22,36,0.88)_100%)] text-[#9fbef0]"}`}>
                   SPONSORS OF THE DAY
                 </p>
               </div>
@@ -1673,6 +2068,57 @@ export default function App() {
           </aside>
 
           <main className="order-1 min-w-0 lg:order-2 lg:h-[calc(100vh-2.5rem)] lg:overflow-y-auto lg:pr-2 hide-scrollbar">
+            <TopNav
+              isLight={isLight}
+              isNavMenuOpen={isNavMenuOpen}
+              setIsNavMenuOpen={setIsNavMenuOpen}
+              setTheme={setTheme}
+              onHome={() => {
+                window.history.pushState("", document.title, window.location.pathname + window.location.search);
+                setSelectedStartup(null);
+                setSelectedCategory(null);
+                setIsAddStartupPage(false);
+                setIsAdvertisePage(false);
+                setIsSellStartupPage(false);
+                setIsAcquireStartupsPage(false);
+              }}
+              onAdd={() => {
+                setSelectedStartup(null);
+                setSelectedCategory(null);
+                setIsAdvertisePage(false);
+                setIsSellStartupPage(false);
+                setIsAcquireStartupsPage(false);
+                setIsAddStartupPage(true);
+                window.location.hash = "add-startup";
+              }}
+              onAcquire={() => {
+                setSelectedStartup(null);
+                setSelectedCategory(null);
+                setIsAddStartupPage(false);
+                setIsAdvertisePage(false);
+                setIsSellStartupPage(false);
+                setIsAcquireStartupsPage(true);
+                window.location.hash = "acquire-startups";
+              }}
+              onSell={() => {
+                setSelectedStartup(null);
+                setSelectedCategory(null);
+                setIsAddStartupPage(false);
+                setIsAdvertisePage(false);
+                setIsAcquireStartupsPage(false);
+                setIsSellStartupPage(true);
+                window.location.hash = "sell-startups";
+              }}
+              onAdvertise={() => {
+                setSelectedStartup(null);
+                setSelectedCategory(null);
+                setIsAddStartupPage(false);
+                setIsSellStartupPage(false);
+                setIsAcquireStartupsPage(false);
+                setIsAdvertisePage(true);
+                window.location.hash = "advertise";
+              }}
+            />
             {isAddStartupPage ? (
               <AddStartupPage
                 onClose={() => {
@@ -1694,13 +2140,13 @@ export default function App() {
                   setIsSellStartupPage(false);
                 }}
               />
-            ) : isBuyStartupsPage ? (
-              <BuyStartupsPage
+            ) : isAcquireStartupsPage ? (
+              <AcquireStartupsPage
                 listings={allStartupCards}
                 onSelectStartup={openStartup}
                 onClose={() => {
                   window.history.pushState("", document.title, window.location.pathname + window.location.search);
-                  setIsBuyStartupsPage(false);
+                  setIsAcquireStartupsPage(false);
                 }}
               />
             ) : profile ? (
@@ -1719,21 +2165,19 @@ export default function App() {
               />
             ) : (
               <>
-                <section className="pb-5 pt-4 text-center sm:pt-8 lg:pt-10">
-                  <div className="mx-auto -mt-5 mb-5 flex w-full max-w-[980px] items-center justify-center gap-3 rounded-2xl border border-[#3b5075]/85 bg-[linear-gradient(130deg,rgba(10,16,28,0.9)_0%,rgba(8,13,24,0.94)_100%)] px-4 py-3 shadow-[0_0_0_1px_rgba(141,173,230,0.24),0_22px_54px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(201,221,255,0.15)] backdrop-blur-xl sm:-mt-8 lg:-mt-10">
-                    <div className="inline-flex items-center justify-center gap-2 text-[clamp(1.25rem,1.4vw,1.65rem)] font-bold">
-                      <CheckCircle2 className="text-[#22c55e]" size={34} strokeWidth={2.5} />
-                      <span className={isLight ? "text-[#1f2937]" : "text-gray-300"}>RealMRR</span>
-                    </div>
-                  </div>
-                  <h1 className={`${isLight ? "text-[#0f172a]" : "text-gray-100"} mx-auto mt-4 max-w-[980px] text-[clamp(1.68rem,3.2vw,2.8rem)] font-bold leading-[1.08] tracking-[-0.02em]`}>
+                <section className="relative pb-5 pt-4 text-center sm:pt-8 lg:pt-10">
+<h1 className={`${isLight ? "text-[#0f172a]" : "text-gray-100"} mx-auto mt-4 max-w-[min(1200px,90vw)] text-[clamp(1.68rem,3.2vw,2.8rem)] font-bold leading-[1.08] tracking-[-0.02em]`}>
                     <span className="block">Use this platform as social proof</span>
                     <span className="block">to showcase your</span>
                     <span className="block">
-                      RealMRR <span role="img" aria-label="rocket">??</span>
+                      RealMRR
                     </span>
                   </h1>
-                  <div className="mt-8 flex items-center justify-center">
+                  <div className="mx-auto mt-4 flex max-w-[min(1200px,90vw)] flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+                    <p className={`text-[clamp(1.1rem,1.5vw,1.45rem)] font-semibold ${isLight ? "text-[#334155]" : "text-[#9fb7dd]"}`}>
+                      Prove your Revenue publicly & Flex {"\u{1F609}"}
+                    </p>
+                    <span className={`text-[clamp(1.1rem,1.6vw,1.5rem)] font-semibold ${isLight ? "text-[#3b82f6]" : "text-[#7fb6ff]"}`}>{"\u2192"}</span>
                     <button
                       type="button"
                       onClick={() => {
@@ -1741,11 +2185,11 @@ export default function App() {
                         setSelectedCategory(null);
                         setIsAdvertisePage(false);
                         setIsSellStartupPage(false);
-                        setIsBuyStartupsPage(false);
+                        setIsAcquireStartupsPage(false);
                         setIsAddStartupPage(true);
                         window.location.hash = "add-startup";
                       }}
-                      className="animated-outline-button relative shrink-0 overflow-hidden rounded-xl border border-white/40 bg-[linear-gradient(120deg,#88deff_0%,#3d86ff_48%,#6c54ff_100%)] px-6 py-2.5 text-[clamp(0.9rem,0.94vw,0.98rem)] font-semibold text-white ring-1 ring-white/60 shadow-[0_0_0_1px_rgba(255,255,255,0.34),0_0_26px_rgba(156,205,255,0.65),0_12px_30px_rgba(66,116,255,0.45)] transition duration-200 hover:brightness-110 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.48),0_0_34px_rgba(171,217,255,0.8),0_16px_36px_rgba(86,101,255,0.55)]"
+                      className="animated-outline-button relative shrink-0 overflow-hidden rounded-xl border border-white/40 bg-[linear-gradient(120deg,#88deff_0%,#3d86ff_48%,#6c54ff_100%)] px-6 py-2.5 text-[clamp(0.9rem,0.94vw,0.98rem)] font-semibold text-white ring-1 ring-white/50 shadow-[0_0_0_1px_rgba(255,255,255,0.28),0_0_14px_rgba(156,205,255,0.4),0_8px_18px_rgba(66,116,255,0.3)] transition duration-200 hover:brightness-110 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.36),0_0_18px_rgba(171,217,255,0.55),0_12px_22px_rgba(86,101,255,0.4)]"
                     >
                       <span className="relative z-10">+ Add startup</span>
                     </button>
@@ -1753,7 +2197,7 @@ export default function App() {
                 </section>
                 <PodiumSection rows={leaderboard} />
                 <section className="mt-6">
-                  <div className="mx-auto flex w-full max-w-[1180px] flex-wrap items-center justify-between gap-3 rounded-[26px] border border-[#3b5075]/85 bg-[linear-gradient(130deg,rgba(10,16,28,0.92)_0%,rgba(8,13,24,0.96)_100%)] px-5 py-4 shadow-[0_0_0_1px_rgba(141,173,230,0.24),0_22px_54px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(201,221,255,0.15)] backdrop-blur-xl sm:flex-nowrap">
+                  <div className="mx-auto flex w-full max-w-[min(1400px,92vw)] flex-wrap items-center justify-between gap-3 rounded-[26px] border border-[#3b5075]/85 bg-[linear-gradient(130deg,rgba(10,16,28,0.92)_0%,rgba(8,13,24,0.96)_100%)] px-5 py-4 shadow-[0_0_0_1px_rgba(141,173,230,0.24),0_22px_54px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(201,221,255,0.15)] backdrop-blur-xl sm:flex-nowrap">
                     <div className="inline-flex items-center gap-3 text-[clamp(1.45rem,1.8vw,2rem)] font-bold">
                       <CheckCircle2 className="text-[#22c55e]" size={36} strokeWidth={2.5} />
                       <span className={isLight ? "text-[#1f2937]" : "text-gray-300"}>RealMRR</span>
@@ -1762,11 +2206,11 @@ export default function App() {
                     <div className="flex flex-wrap items-center justify-end gap-3">
                       <button
                         type="button"
-                        onClick={openBuyStartupsPage}
+                        onClick={openAcquireStartupsPage}
                         className="group relative overflow-hidden rounded-[22px] border border-[#bcecff]/85 bg-[linear-gradient(120deg,#1cb2ff_0%,#3d7dff_50%,#34d7c8_100%)] px-8 py-3 text-[clamp(1rem,1.08vw,1.14rem)] font-extrabold text-white shadow-[0_0_0_1px_rgba(142,222,255,0.45),0_6px_18px_rgba(58,160,255,0.24)] transition duration-200 hover:-translate-y-0.5 hover:brightness-110"
                       >
                         <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.38)_0%,transparent_55%)] opacity-80" />
-                        <span className="relative">Buy Profitable Startups</span>
+                        <span className="relative">Acquire/Buy Startups</span>
                       </button>
 
                       <button
@@ -1796,17 +2240,17 @@ export default function App() {
               onSelectCategory={(category) => {
                 setSelectedStartup(null);
                 setIsAddStartupPage(false);
-    setIsAdvertisePage(false);
-    setIsSellStartupPage(false);
-    setIsBuyStartupsPage(false);
+                setIsAdvertisePage(false);
+                setIsSellStartupPage(false);
+                setIsAcquireStartupsPage(false);
                 setSelectedCategory(category);
               }}
             />
           </main>
 
-          <aside className="order-3 grid gap-2.5 sm:grid-cols-2 lg:sticky lg:top-2 lg:max-h-[calc(100vh-1rem)] lg:grid-cols-1 lg:overflow-hidden">
+          <aside className="order-3 grid gap-2 sm:grid-cols-2 lg:sticky lg:top-2 lg:max-h-[calc(100vh-1rem)] lg:grid-cols-1 lg:overflow-y-auto lg:overflow-x-hidden lg:pr-1 hide-scrollbar">
             <div className="sm:col-span-2 lg:col-span-1">
-                <p className="rounded-xl border border-[#3b4f74]/80 bg-[linear-gradient(110deg,rgba(22,33,52,0.85)_0%,rgba(13,22,36,0.88)_100%)] px-3 py-2 text-center text-[10px] font-semibold tracking-[0.08em] text-[#9fbef0] shadow-[inset_0_0_0_1px_rgba(151,187,245,0.12)]">
+                <p className={`rounded-xl border px-3 py-2 text-center text-[10px] font-semibold tracking-[0.08em] shadow-[inset_0_0_0_1px_rgba(151,187,245,0.12)] ${isLight ? "border-[#cbd5e1] bg-[linear-gradient(110deg,rgba(250,252,255,0.95)_0%,rgba(236,242,250,0.98)_100%)] text-[#334155]" : "border-[#3b4f74]/80 bg-[linear-gradient(110deg,rgba(22,33,52,0.85)_0%,rgba(13,22,36,0.88)_100%)] text-[#9fbef0]"}`}>
                   SPONSORS OF THE DAY
                 </p>
               </div>
@@ -1832,10 +2276,6 @@ export default function App() {
     </div>
   );
 }
-
-
-
-
 
 
 

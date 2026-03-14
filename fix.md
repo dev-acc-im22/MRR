@@ -14,6 +14,8 @@ Keep entries short, practical, and testable.
 
 | Date | Problem (Symptom) | Root Cause | Solution (Crisp) | Verify | Status |
 |---|---|---|---|---|---|
+| 2026-03-14 | Vite JSX error: "Expected corresponding JSX closing tag" in `src/App.jsx` | Duplicate/partial navbar markup left inside home hero after refactor, leading to unbalanced tags | Removed stray navbar block from hero; use shared `TopNav` component only | `npm run build` succeeds; app loads without JSX parse error | Resolved |
+| 2026-03-14 | Vite error: `Unexpected token` in `src/App.jsx` (dev server fails) | Malformed JSX tag from template-literal className missing closing `>` after edits | Fixed the opening `<div>` tag to close properly and corrected template literal; updated `src/App.jsx` | Vite dev server renders home without error | Resolved |
 | 2026-03-04 | Blank page on `http://127.0.0.1:5500/` | VS Code Live Server served raw React JSX (`/src/main.jsx`) instead of Vite-transformed modules | Run app with Vite, not Live Server. Use `npm run dev`. | Page source contains `/@vite/client`; UI renders | Resolved |
 | 2026-03-04 | `npm run dev` failed: `Port 5500 is already in use` | Live Server occupied port `5500` (`Code.exe`) | Stop `Go Live` first, then start Vite | `Get-NetTCPConnection -LocalPort 5500` shows `node` (vite), not `Code.exe` | Resolved |
 | 2026-03-04 | Same URL worked once, then fallback page returned | Live Server was started again and took over `5500` | Keep single owner for port `5500`: Vite only | `netstat -ano | findstr :5500` maps to Vite node process | Resolved |

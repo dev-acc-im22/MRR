@@ -27,14 +27,14 @@ function TileFace({ tone, entry }) {
   const Icon = iconMap[entry.icon] || Box;
 
   return (
-    <article className={`min-h-[74px] overflow-hidden rounded-xl border p-2.5 shadow-panel ${tone}`}>
+    <article className={`min-h-[clamp(70px,6.2vw,98px)] overflow-hidden rounded-xl border p-[clamp(9px,1vw,12px)] shadow-panel ${tone}`}>
       <div className="flex items-center gap-2.5">
-        <span className="grid h-7 w-7 shrink-0 place-content-center rounded-full border border-white/28 bg-black/25">
-          <Icon size={14} strokeWidth={1.7} className="text-[#cfe2ff]" />
+        <span className="grid h-[clamp(26px,2.6vw,36px)] w-[clamp(26px,2.6vw,36px)] shrink-0 place-content-center rounded-full border border-white/28 bg-black/25">
+          <Icon size={18} strokeWidth={1.7} className="text-[#cfe2ff]" />
         </span>
-        <h4 className="truncate text-[12px] font-bold leading-none tracking-tight text-white">{entry.title}</h4>
+        <h4 className="truncate text-[clamp(11px,1vw,15px)] font-bold leading-none tracking-tight text-white">{entry.title}</h4>
       </div>
-      <p className="mt-1 truncate text-[9px] leading-[1.25] text-[#d5e0f6]/90">{entry.desc}</p>
+      <p className="mt-1 truncate text-[clamp(8px,0.8vw,11px)] leading-[1.3] text-[#d5e0f6]/90">{entry.desc}</p>
     </article>
   );
 }
@@ -56,10 +56,10 @@ export default function SidebarCard({
       <button
         type="button"
         onClick={onAdvertise}
-        className="grid min-h-[108px] w-full place-content-center gap-1 rounded-xl border border-dashed border-[#2a2a2a] bg-[#0e0e0e] text-center text-gray-500 shadow-panel transition hover:border-[#3e4d72] hover:bg-[#121722]"
+        className="grid min-h-[clamp(96px,8.5vw,132px)] w-full place-content-center gap-1 rounded-xl border border-dashed border-[#2a2a2a] bg-[#0e0e0e] text-center text-gray-500 shadow-panel transition hover:border-[#3e4d72] hover:bg-[#121722]"
       >
-        <strong className="text-[10px] text-gray-300">Advertise</strong>
-        <small className="text-[10px]">1/20 spot left</small>
+        <strong className="text-[clamp(9px,0.9vw,12px)] text-gray-300">Advertise</strong>
+        <small className="text-[clamp(9px,0.8vw,11px)]">1/20 spot left</small>
       </button>
     );
   }

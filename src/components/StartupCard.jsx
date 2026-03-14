@@ -1,5 +1,7 @@
+import { UserX } from "lucide-react";
 ﻿export default function StartupCard({ item, onSelect }) {
   const category = item.category || "SaaS";
+  const isAnonymous = Boolean(item.anonymous || item.isAnonymous);
   const nicheText = typeof item.niche === "string" ? item.niche.trim() : "";
   const normalize = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
   const showNiche = nicheText.length > 0 && normalize(nicheText) !== normalize(category);
@@ -8,15 +10,20 @@
     <button
       type="button"
       onClick={() => onSelect?.(item)}
-      className="relative w-[222px] shrink-0 overflow-hidden rounded-2xl border border-[#33363c] bg-[linear-gradient(180deg,#1b1b1d_0%,#17181a_100%)] px-4 py-4 text-left shadow-panel transition duration-200 hover:-translate-y-0.5 hover:border-[#4a4f58] hover:shadow-hover"
+      className="relative w-[clamp(200px,16vw,260px)] shrink-0 overflow-hidden rounded-2xl border border-[#33363c] bg-[linear-gradient(180deg,#1b1b1d_0%,#17181a_100%)] px-4 py-4 text-left shadow-panel transition duration-200 hover:-translate-y-0.5 hover:border-[#4a4f58] hover:shadow-hover"
     >
       <span className="absolute right-0 top-0 whitespace-nowrap rounded-tr-2xl rounded-bl-lg bg-[#3b2a18] px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.05em] text-[#f4b022]">
         FOR SALE
       </span>
 
       <div className="mb-3.5 flex items-start gap-2.5">
-        <span className="mt-0.5 grid h-9 w-9 place-content-center rounded-xl border border-[#33486a] bg-[#1a2740] text-[11px] font-bold text-[#8fb4ff]">
-          {item.logo}
+        <span className="relative mt-0.5 grid h-9 w-9 place-content-center rounded-xl border border-[#33486a] bg-[#1a2740] text-[11px] font-bold text-[#8fb4ff]">
+          <span className={isAnonymous ? "opacity-40 blur-[0.6px]" : ""}>{item.logo}</span>
+          {isAnonymous ? (
+            <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-content-center rounded-full border border-[#3b557e] bg-[#0f1b2d] text-[#9fc7ff]">
+              <UserX size={10} />
+            </span>
+          ) : null}
         </span>
         <div className="min-w-0">
           <p className="truncate text-[11px] font-semibold leading-[1.2] text-[#5fc0ff]">{item.name}</p>

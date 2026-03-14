@@ -1,4 +1,4 @@
-﻿import { ArrowDown, ArrowUp, Check, ChevronDown, Medal, ShieldCheck, X } from "lucide-react";
+﻿import { ArrowDown, ArrowUp, Check, ChevronDown, Medal, ShieldCheck, UserX, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 function SelectPill({ id, value, options, isOpen, onToggle, onSelect, minWidth = 118 }) {
@@ -65,10 +65,15 @@ function Trend({ growth, growthPct }) {
   return <span className="text-[11px] font-semibold text-gray-500">{growthPct || "0%"}</span>;
 }
 
-function InitialChip({ text }) {
+function InitialChip({ text, isAnonymous }) {
   return (
-    <span className="grid h-8 w-8 shrink-0 place-content-center rounded-full border border-[#36507b] bg-[#21304a] text-[10px] font-semibold text-[#c3d8ff]">
-      {text}
+    <span className="relative grid h-8 w-8 shrink-0 place-content-center rounded-full border border-[#36507b] bg-[#21304a] text-[10px] font-semibold text-[#c3d8ff]">
+      <span className={isAnonymous ? "opacity-40 blur-[0.6px]" : ""}>{text}</span>
+      {isAnonymous ? (
+        <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-content-center rounded-full border border-[#3b557e] bg-[#0f1b2d] text-[#9fc7ff]">
+          <UserX size={10} />
+        </span>
+      ) : null}
     </span>
   );
 }
@@ -243,7 +248,7 @@ export default function LeaderboardTable({ rows, onSelectStartup }) {
                       onClick={() => onSelectStartup?.({ ...row, name: row.startup, niche: row.startupTag, category: row.category })}
                       className="flex min-w-0 w-full items-center gap-2.5 rounded-lg text-left transition hover:bg-[#1a2230]/45"
                     >
-                      <InitialChip text={row.startup.slice(0, 2).toUpperCase()} />
+                      <InitialChip text={row.startup.slice(0, 2).toUpperCase()} isAnonymous={row.anonymous} />
                       <div className="min-w-0 pr-1">
                         <div className="flex items-center gap-2">
                           <p className={`truncate ${isTop3 ? "text-[14px]" : "text-[13px]"} font-semibold text-gray-100`}>{row.startup}</p>
