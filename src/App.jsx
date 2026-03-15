@@ -14,10 +14,15 @@ import {
   Dumbbell,
   Eye,
   ExternalLink,
+  Flame,
   Globe2,
+  Ghost,
   Heart,
   Home,
+  Mail,
   Megaphone,
+  MessageCircle,
+  Minus,
   Moon,
   Palette,
   Plane,
@@ -156,6 +161,10 @@ function buildStartupProfile(source, byName) {
   return {
     name,
     logo: source?.logo || toInitials(name),
+    price: source?.price || seedRow?.price || null,
+    forSale: Boolean(source?.forSale || seedRow?.forSale),
+    verifiedRevenue: Boolean(source?.verifiedRevenue || seedRow?.verifiedRevenue),
+    verifiedFounder: Boolean(source?.verifiedFounder || seedRow?.verifiedFounder),
     niche,
     category: source?.category || seedRow?.category || "SaaS",
     founder,
@@ -1072,6 +1081,12 @@ function AcquireStartupsPage({ onClose, listings, onSelectStartup }) {
                     <span className="rounded-md border border-[#355080] bg-[#16233b] px-2 py-1 text-[10px] font-semibold text-[#aaccff]">
                       {item.category || "SaaS"}
                     </span>
+                    {item.verifiedRevenue ? (
+                      <span className="rounded-full border border-[#2f5f45] bg-[#10241a] px-2 py-1 text-[10px] font-semibold text-[#7de3aa]">Verified Revenue</span>
+                    ) : null}
+                    {item.verifiedFounder ? (
+                      <span className="rounded-full border border-[#2f4663] bg-[#0f1c2e] px-2 py-1 text-[10px] font-semibold text-[#9fc2ff]">Verified Founder</span>
+                    ) : null}
                   </div>
 
                   <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
@@ -1087,6 +1102,14 @@ function AcquireStartupsPage({ onClose, listings, onSelectStartup }) {
                       <p className="text-[#7f95bc]">Category</p>
                       <p className="mt-1 font-semibold text-[#e8f0ff]">{item.category || "SaaS"}</p>
                     </div>
+                  </div>
+
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-[#2f4b6b] bg-[#121c2d] px-3 py-1 text-[10px] font-semibold text-[#aaccff]">
+                    Escrow.com supported
+                  </div>
+
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-[#2f4b6b] bg-[#121c2d] px-3 py-1 text-[10px] font-semibold text-[#aaccff]">
+                    Escrow.com supported
                   </div>
 
                   <button
@@ -1171,9 +1194,12 @@ function TopNav({
   isNavMenuOpen,
   setIsNavMenuOpen,
   setTheme,
+  ghostMode,
+  setGhostMode,
   onHome,
   onAdd,
   onAcquire,
+  onHappenings,
   onSell,
   onAdvertise,
 }) {
@@ -1191,6 +1217,15 @@ function TopNav({
               {isLight ? <Sun size={14} /> : <Moon size={14} />}
             </span>
             <span className="hidden sm:inline">{isLight ? "Light" : "Dark"}</span>
+          </button>
+
+          <button
+            type="button"
+            aria-label="Toggle Ghost Mode"
+            onClick={() => setGhostMode((prev) => !prev)}
+            className={`group relative flex h-10 items-center justify-center rounded-full border px-2 text-[10px] font-semibold uppercase tracking-[0.12em] transition ${ghostMode ? "border-[#7a1c1c] bg-[#3a0d0d] text-[#ffb4b4] shadow-[0_0_0_1px_rgba(255,120,120,0.4)]" : isLight ? "border-[#c3d2ea] bg-white text-[#334155] shadow-[inset_0_0_0_1px_rgba(120,140,170,0.12)]" : "border-[#3b5075]/85 bg-[#0b1220]/80 text-[#cfe0ff] shadow-[inset_0_0_0_1px_rgba(141,173,230,0.12)]"}`}
+          >
+            <Ghost size={14} />
           </button>
         </div>
 
@@ -1232,6 +1267,7 @@ function TopNav({
                   { label: "HOME", action: onHome },
                   { label: "ADD STARTUP", action: onAdd },
                   { label: "ACQUIRE/BUY STARTUPS", action: onAcquire },
+                  { label: "WHAT'S HAPPENING", action: onHappenings },
                   { label: "SELL STARTUP", action: onSell },
                   { label: "ADVERTISE", action: onAdvertise },
                 ].map((item) => (
@@ -1253,6 +1289,219 @@ function TopNav({
         </div>
       ) : null}
     </div>
+  );
+}
+
+
+function HappeningsPage({ onClose }) {
+  const feed = [
+    {
+      id: 1,
+      name: "AntForms",
+      action: "added",
+      title: "AntForms",
+      desc: "Form builder that is actually free not just in marketing.",
+      time: "52m",
+      tags: ["$0/mo", "$0 MRR", "$0 total"],
+      avatar: "AF",
+      badge: "AntForms",
+    },
+    {
+      id: 2,
+      name: "Amir",
+      action: "on",
+      title: "Founder Lift",
+      desc: "Yooo",
+      time: "1h",
+      tags: [],
+      avatar: "AL",
+      badge: "Founder Lift",
+    },
+    {
+      id: 3,
+      name: "@yaramasagautham",
+      action: "added",
+      title: "Upvotics",
+      desc: "Upvotics is a competitive intelligence tool that automatically monitors competitor websites and alerts you with changes.",
+      time: "2h",
+      tags: ["$0/mo", "$12 MRR", "$379 total"],
+      avatar: "YU",
+      badge: "Upvotics",
+    },
+    {
+      id: 4,
+      name: "Nicolas Mauro",
+      action: "is selling",
+      title: "Virlo",
+      desc: "Create custom data sets (niches) and have an always on short-form video brain for your agent.",
+      time: "2h",
+      tags: ["$0/mo", "$0 MRR", "$0 total", "Asking $750k"],
+      avatar: "NM",
+      badge: "Virlo",
+    },
+    {
+      id: 5,
+      name: "@_r_s_j_",
+      action: "is selling",
+      title: "Power Prompt",
+      desc: "AI guardrail. Makes vibecoding safer and prevents data leaks by creating boundary rules for your agents.",
+      time: "2h",
+      tags: ["$10/mo", "$0 MRR", "$0 total", "Asking $700"],
+      avatar: "AL",
+      badge: "Power Prompt",
+    },
+  ];
+
+  const fastest = [
+    { name: "Roofclaw", mrr: "$50k/mo", growth: "+7,532%" },
+    { name: "Localinvitation", mrr: "$1.7k/mo", growth: "+6,234%" },
+    { name: "Simpleoutreach", mrr: "$2.4k/mo", growth: "+4,153%" },
+    { name: "APPRENDS.IO", mrr: "$771/mo", growth: "+3,755%" },
+    { name: "ExportTiktok", mrr: "$3.0k/mo", growth: "+3,612%" },
+  ];
+
+  const safeBestDeals = Array.isArray(bestDeals) ? bestDeals : [];
+  const safeRecentlyListed = Array.isArray(recentlyListed) ? recentlyListed : [];
+  const salePool = [...safeBestDeals, ...safeRecentlyListed].filter((item) => item?.forSale || item?.price);
+  const dealOfWeek = (() => {
+    try {
+      return salePool.reduce((best, item) => {
+        const revenueValue = parseMoney(item?.revenue || item?.mrr || item?.price || "$0");
+        const viewers = 60 + (hashText(item?.name || "") % 240);
+        if (!best) return { item, revenueValue, viewers };
+        if (revenueValue > best.revenueValue) return { item, revenueValue, viewers };
+        if (revenueValue === best.revenueValue && viewers > best.viewers) return { item, revenueValue, viewers };
+        return best;
+      }, null);
+    } catch {
+      return null;
+    }
+  })();
+
+  return (
+    <section className="pt-4 sm:pt-8">
+      <div className="mb-6 flex items-center justify-center gap-3 text-center">
+        <Sparkles className="h-5 w-5 text-[#6ca6ff]" />
+        <h1 className="text-[clamp(1.4rem,2.6vw,2.2rem)] font-semibold italic text-gray-100">
+          What's happening on RealMRR?
+        </h1>
+      </div>
+
+      <div className="grid gap-6">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
+          <div className="space-y-4">
+            {feed.map((item) => (
+              <article
+                key={item.id}
+                className="rounded-2xl border border-[#2b313c] bg-[#15181f] p-4 shadow-[0_14px_30px_rgba(0,0,0,0.3)]"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="grid h-9 w-9 place-content-center rounded-full border border-[#2a3446] bg-[#0f1726] text-[11px] font-semibold text-[#d6e2ff]">
+                      {item.avatar}
+                    </span>
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-gray-400">
+                      <span className="font-semibold text-gray-100">{item.name}</span>
+                      <span>{item.action}</span>
+                      <span className="inline-flex items-center gap-2 rounded-full border border-[#243147] bg-[#0f1522] px-2 py-0.5 text-[10px] font-semibold text-[#d6e2ff]">
+                        <span className="grid h-4 w-4 place-content-center rounded-full text-[9px] text-white" style={{ backgroundColor: "#19c2b2" }}></span>
+                        {item.badge || item.title}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-[11px] text-gray-500">{item.time}</span>
+                </div>
+
+                <p className="mt-3 text-sm text-gray-200">{item.desc}</p>
+
+                {item.tags.length ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {item.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full border border-[#1f2733] bg-[#0d1017] px-2 py-1 text-[10px] text-[#d3d8e5]"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+
+                <div className="mt-3 flex items-center gap-3 text-[11px] text-gray-500">
+                  <span className="flex items-center gap-1"><Heart size={12} /> 0</span>
+                  <span className="flex items-center gap-1"><MessageCircle size={12} /> 0</span>
+                  <span className="flex items-center gap-1"><Share2 size={12} /> 0</span>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <aside className="space-y-4">
+            <div className="rounded-2xl border border-[#2b313c] bg-[#15181f] p-4 shadow-[0_12px_24px_rgba(0,0,0,0.28)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#d8e7ff]">List your startup</p>
+              <p className="mt-2 text-xs text-gray-400">Add your startup to RealMRR and share updates with the community.</p>
+              <button className="mt-4 w-full rounded-lg border border-[#cbd5f5] bg-[#f3f4f6] px-3 py-2 text-xs font-semibold text-[#111827]">
+                + Add your startup
+              </button>
+            </div>
+
+            <div className="rounded-2xl border border-[#2b313c] bg-[#15181f] p-4 shadow-[0_12px_24px_rgba(0,0,0,0.28)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#d8e7ff]">Fastest growing startups</p>
+              <div className="mt-3 space-y-3 text-xs text-gray-200">
+                {fastest.map((row, idx) => (
+                  <div key={row.name} className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[11px] text-gray-500">{idx + 1}</span>
+                      <div>
+                        <div className="text-sm font-semibold text-gray-100">{row.name}</div>
+                        <div className="text-[11px] text-gray-500">{row.mrr}</div>
+                      </div>
+                    </div>
+                    <span className="text-emerald-400">{row.growth}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[#2b313c] bg-[#15181f] p-4 shadow-[0_12px_24px_rgba(0,0,0,0.28)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#d8e7ff]">Posting streaks</p>
+              <div className="mt-3 space-y-3 text-xs text-gray-200">
+                {streaks.map((row, idx) => (
+                  <div key={row.name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[11px] text-gray-500">{idx + 1}</span>
+                      <span className="text-sm font-semibold text-gray-100">{row.name}</span>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-amber-400"><Flame size={12} />{row.streak}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[#2b313c] bg-[#15181f] p-4 shadow-[0_12px_24px_rgba(0,0,0,0.28)]">
+              <div className="flex items-center justify-between text-xs text-gray-400">
+                <span className="font-semibold text-gray-200">Deal of the week</span>
+                <button className="inline-flex items-center gap-1 text-[#7fb6ff]">View all <ChevronRight size={12} /></button>
+              </div>
+              {dealOfWeek ? (
+                <div className="mt-3 rounded-xl border border-[#263246] bg-[#0f1522] p-3">
+                  <p className="text-sm font-semibold text-gray-100">{dealOfWeek.item.name}</p>
+                  <p className="mt-1 text-[11px] text-gray-400">{dealOfWeek.item.niche || dealOfWeek.item.tagline || "Revenue-verified startup"}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+                    <span className="rounded-full border border-[#2a3a56] bg-[#0e1422] px-2 py-1 text-[#c8d7f7]">Revenue {formatMoney(dealOfWeek.revenueValue)}</span>
+                    <span className="rounded-full border border-[#2a3a56] bg-[#0e1422] px-2 py-1 text-[#c8d7f7]">{dealOfWeek.viewers} viewers</span>
+                    <span className="rounded-full border border-[#2a3a56] bg-[#0e1422] px-2 py-1 text-[#c8d7f7]">For sale</span>
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-3 text-[11px] text-gray-500">No deals available yet.</p>
+              )}
+            </div>
+          </aside>
+        </div>
+
+      </div>
+    </section>
   );
 }
 
@@ -1309,7 +1558,7 @@ function DirectoryFooter({ isLight, theme, setTheme, onSelectCategory, activeCat
 
           <div className={`${isLight ? "border-[#d6deeb] bg-[#f8fafc]" : "border-[#273043] bg-[linear-gradient(135deg,#131a26_0%,#121726_60%,#1a1d2e_100%)]"} rounded-2xl border p-5`}>
             <h4 className={`${isLight ? "border-[#c9d8f4] bg-[#eaf1ff] text-[#1e40af]" : "border-[#2d446b] bg-[#111f35] text-[#8fb4ff]"} mb-4 flex w-full rounded-lg border px-3 py-1.5 text-lg font-semibold`}>
-              A Note from Allen ??
+              A Note from Allen {"\u2764\uFE0F"}
             </h4>
             <p className={`${isLight ? "text-[#374151]" : "text-gray-300"} text-sm leading-7`}>
               Thank you for spending your precious time exploring RealMRR. Your support means a lot to me as the founder of this platform, and I am deeply grateful for your visit.
@@ -1346,31 +1595,42 @@ function DirectoryFooter({ isLight, theme, setTheme, onSelectCategory, activeCat
   );
 }
 function StartupDetail({ profile, onBack, recommendations, onSelectStartup }) {
+  const isForSale = Boolean(profile?.forSale);
+  const mrrValue = parseMoney(profile?.mrr || profile?.price || "$0");
+  const priceValue = parseMoney(profile?.price || "");
+  const displayPrice = profile?.price || (priceValue ? formatMoney(priceValue) : profile?.mrr) || "$0";
+  const multipleValue = priceValue && mrrValue ? (priceValue / Math.max(1, mrrValue)) : null;
+  const saleMultiplier = multipleValue ? `${multipleValue.toFixed(1)}x revenue` : (mrrValue ? "1.2x revenue" : "Revenue verified");
+  const buyersSeen = 18 + (hashText(profile?.name || "") % 37);
+
   return (
     <section className="pt-4 sm:pt-8">
-      <div className="mb-4 rounded-2xl border border-[#5b3a1b] bg-[linear-gradient(120deg,rgba(76,34,16,0.85)_0%,rgba(45,22,12,0.92)_100%)] px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-[13px] font-semibold text-[#f6d4b6]">
-            <ArrowLeft size={14} className="text-[#f7b277]" />
-            <span>This startup is for sale.</span>
-            <span className="text-[#ffd8b5]">Asking price: {profile.price || profile.mrr}</span>
+      {isForSale ? (
+        <div className="mb-4 rounded-2xl border border-[#5b3a1b] bg-[linear-gradient(120deg,rgba(76,34,16,0.85)_0%,rgba(45,22,12,0.92)_100%)] px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-[13px] font-semibold text-[#f6d4b6]">
+              <ArrowLeft size={14} className="text-[#f7b277]" />
+              <span>This startup is for sale.</span>
+              <span className="text-[#ffd8b5]">Asking price: {displayPrice}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button className="inline-flex items-center gap-2 rounded-lg border border-[#8f4a20] bg-[#2a1710] px-3 py-2 text-xs font-semibold text-[#ffc99a]">
+                <Heart size={13} />
+                Save
+              </button>
+              <button className="inline-flex items-center gap-2 rounded-lg border border-[#f4a460] bg-[#f0811f] px-3 py-2 text-xs font-semibold text-white">
+                <Share2 size={13} />
+                Contact Seller
+              </button>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <button className="inline-flex items-center gap-2 rounded-lg border border-[#8f4a20] bg-[#2a1710] px-3 py-2 text-xs font-semibold text-[#ffc99a]">
-              <Heart size={13} />
-              Save
-            </button>
-            <button className="inline-flex items-center gap-2 rounded-lg border border-[#f4a460] bg-[#f0811f] px-3 py-2 text-xs font-semibold text-white">
-              <Share2 size={13} />
-              Contact Seller
-            </button>
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-[#f1caa5]">
+            <span className="rounded-full border border-[#6b3b20] bg-[#2a1911] px-2 py-1">{saleMultiplier}</span>
+            <span className="rounded-full border border-[#6b3b20] bg-[#2a1911] px-2 py-1">{buyersSeen} buyers saw this recently</span>
+            <span className="rounded-full border border-[#6b3b20] bg-[#2a1911] px-2 py-1">Escrow.com supported</span>
           </div>
         </div>
-        <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-[#f1caa5]">
-          <span className="rounded-full border border-[#6b3b20] bg-[#2a1911] px-2 py-1">1.2x revenue</span>
-          <span className="rounded-full border border-[#6b3b20] bg-[#2a1911] px-2 py-1">35 buyers saw this recently</span>
-        </div>
-      </div>
+      ) : null}
 
       <button
         type="button"
@@ -1384,7 +1644,7 @@ function StartupDetail({ profile, onBack, recommendations, onSelectStartup }) {
       <div className="rounded-2xl border border-[#252a35] bg-[#111319] p-4 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs text-gray-500">RealMRR › Startup › {profile.name}</p>
+            <p className="text-xs text-gray-500">RealMRR  Startup  {profile.name}</p>
             <div className="mt-3 flex items-center gap-3">
               <span className="grid h-14 w-14 place-content-center rounded-full border border-[#3a4f79] bg-[#314b89] text-xl font-bold text-white">
                 {profile.logo}
@@ -1867,7 +2127,7 @@ function Section({ title, items, onSelectStartup }) {
     <section className="mt-10">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="inline-flex items-center gap-2 rounded-md bg-[#1a1f2a] px-3 py-1 text-[clamp(1.05rem,1.2vw,1.3rem)] font-semibold text-[#f4f7ff] shadow-[inset_0_0_0_1px_#2c3b57]">{title}</h3>
-        <a href="#" className="text-xs text-gray-300 hover:text-white">View all ›</a>
+        <a href="#" className="text-xs text-gray-300 hover:text-white">View all </a>
       </div>
 
       <div className="relative overflow-hidden">
@@ -1919,6 +2179,9 @@ export default function App() {
   const [selectedStartup, setSelectedStartup] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isNavMenuOpen, setIsNavMenuOpen] = useState(false);
+  const [ghostMode, setGhostMode] = useState(() => localStorage.getItem("realmrr-ghost") === "true");
+  const [showDailyPopup, setShowDailyPopup] = useState(false);
+  const [isPopupCollapsed, setIsPopupCollapsed] = useState(false);
   const [isAddStartupPage, setIsAddStartupPage] = useState(() =>
     typeof window !== "undefined" ? window.location.hash === "#add-startup" : false
   );
@@ -1931,12 +2194,44 @@ export default function App() {
   const [isAcquireStartupsPage, setIsAcquireStartupsPage] = useState(() =>
     typeof window !== "undefined" ? window.location.hash === "#acquire-startups" : false
   );
+  const [isHappeningsPage, setIsHappeningsPage] = useState(() =>
+    typeof window !== "undefined" ? window.location.hash === "#happenings" : false
+  );
   const isLight = theme === "light";
+  const baseLeftFeatures = leftFeatures;
+  const baseRightFeatures = rightFeatures;
+  const baseRecentlyListed = recentlyListed;
+  const baseBestDeals = bestDeals;
+  const baseLeaderboard = leaderboard;
+  const activeLeftFeatures = ghostMode ? baseLeftFeatures : [];
+  const activeRightFeatures = ghostMode ? baseRightFeatures : [];
+  const activeRecentlyListed = ghostMode ? baseRecentlyListed : [];
+  const activeBestDeals = ghostMode ? baseBestDeals : [];
+  const activeLeaderboard = ghostMode ? baseLeaderboard : [];
 
   useEffect(() => {
     localStorage.setItem("realmrr-theme", theme);
     document.documentElement.style.colorScheme = isLight ? "light" : "dark";
   }, [theme, isLight]);
+
+  useEffect(() => {
+    localStorage.setItem("realmrr-ghost", ghostMode ? "true" : "false");
+  }, [ghostMode]);
+
+  const getDailyPopupKey = () => `realmrr-daily-popup-${new Date().toISOString().slice(0, 10)}`;
+
+  useEffect(() => {
+    const key = getDailyPopupKey();
+    const dismissed = localStorage.getItem(key) === "true";
+    setShowDailyPopup(!dismissed);
+  }, []);
+
+  const dismissDailyPopup = () => {
+    const key = getDailyPopupKey();
+    localStorage.setItem(key, "true");
+    setShowDailyPopup(false);
+    setIsPopupCollapsed(false);
+  };
 
   useEffect(() => {
     const onHashChange = () => {
@@ -1945,19 +2240,20 @@ export default function App() {
       setIsAdvertisePage(hash === "#advertise");
       setIsSellStartupPage(hash === "#sell-startups");
       setIsAcquireStartupsPage(hash === "#acquire-startups");
+      setIsHappeningsPage(hash === "#happenings");
     };
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
 
-  const byName = useMemo(() => new Map(leaderboard.map((row) => [row.startup.toLowerCase(), row])), []);
+  const byName = useMemo(() => new Map(activeLeaderboard.map((row) => [row.startup.toLowerCase(), row])), []);
   const profile = useMemo(
     () => (selectedStartup ? buildStartupProfile(selectedStartup, byName) : null),
     [selectedStartup, byName]
   );
 
   const relatedStartups = useMemo(() => {
-    const pool = [...recentlyListed, ...bestDeals];
+    const pool = [...activeRecentlyListed, ...activeBestDeals];
     if (!selectedStartup) return pool.slice(0, 6);
     return pool.filter((entry) => entry.name !== selectedStartup.name).slice(0, 6);
   }, [selectedStartup]);
@@ -1968,6 +2264,7 @@ export default function App() {
     setIsAdvertisePage(false);
     setIsSellStartupPage(false);
     setIsAcquireStartupsPage(false);
+    setIsHappeningsPage(false);
     setSelectedStartup(startup);
   };
 
@@ -1977,6 +2274,7 @@ export default function App() {
     setIsAddStartupPage(false);
     setIsSellStartupPage(false);
     setIsAcquireStartupsPage(false);
+    setIsHappeningsPage(false);
     setIsAdvertisePage(true);
     window.location.hash = "advertise";
   };
@@ -1992,6 +2290,17 @@ export default function App() {
   };
 
 
+  const openHappeningsPage = () => {
+    setSelectedStartup(null);
+    setSelectedCategory(null);
+    setIsAddStartupPage(false);
+    setIsAdvertisePage(false);
+    setIsSellStartupPage(false);
+    setIsAcquireStartupsPage(false);
+    setIsHappeningsPage(true);
+    window.location.hash = "happenings";
+  };
+
   const openSellStartupPage = () => {
     setSelectedStartup(null);
     setSelectedCategory(null);
@@ -2001,11 +2310,12 @@ export default function App() {
     setIsSellStartupPage(true);
     window.location.hash = "sell-startups";
   };
-  const sponsorTileCount = leftFeatures.length + rightFeatures.length;
+  const sponsorTileCount = activeLeftFeatures.length + activeRightFeatures.length;
   const [activeSponsorTile, setActiveSponsorTile] = useState(0);
   const [sponsorFlipStep, setSponsorFlipStep] = useState(0);
 
   useEffect(() => {
+    if (!sponsorTileCount) return;
     setActiveSponsorTile(0);
     setSponsorFlipStep((prev) => prev + 1);
 
@@ -2018,7 +2328,7 @@ export default function App() {
   }, [sponsorTileCount]);
 
   const allStartupCards = useMemo(() => {
-    const listRows = leaderboard.slice(0, 60).map((row) => ({
+    const listRows = activeLeaderboard.slice(0, 60).map((row) => ({
       logo: row.startup.slice(0, 2).toUpperCase(),
       name: row.startup,
       niche: row.startupTag,
@@ -2028,9 +2338,11 @@ export default function App() {
       founder: row.founder,
       category: row.category,
       anonymous: row.anonymous,
+      verifiedRevenue: row.verifiedRevenue,
+      verifiedFounder: row.verifiedFounder,
     }));
 
-    return [...recentlyListed, ...bestDeals, ...listRows].map((item) => ({
+    return [...activeRecentlyListed, ...activeBestDeals, ...listRows].map((item) => ({
       ...item,
       category: item.category || "SaaS",
     }));
@@ -2052,7 +2364,7 @@ export default function App() {
                   SPONSORS OF THE DAY
                 </p>
               </div>
-            {leftFeatures.map((feature, index) => (
+            {activeLeftFeatures.map((feature, index) => (
               <SidebarCard
                 key={feature.title}
                 title={feature.title}
@@ -2068,11 +2380,18 @@ export default function App() {
           </aside>
 
           <main className="order-1 min-w-0 lg:order-2 lg:h-[calc(100vh-2.5rem)] lg:overflow-y-auto lg:pr-2 hide-scrollbar">
+            {ghostMode ? (
+              <div className={`mb-3 w-full rounded-xl border px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.2em] ${isLight ? "border-[#f1c5c5] bg-[#fff1f1] text-[#7a1c1c]" : "border-[#6b1b1b] bg-[#2a0b0b] text-[#ffb4b4]"}`}>
+                GHOST MODE : ACTIVATED
+              </div>
+            ) : null}
             <TopNav
               isLight={isLight}
               isNavMenuOpen={isNavMenuOpen}
               setIsNavMenuOpen={setIsNavMenuOpen}
               setTheme={setTheme}
+              ghostMode={ghostMode}
+              setGhostMode={setGhostMode}
               onHome={() => {
                 window.history.pushState("", document.title, window.location.pathname + window.location.search);
                 setSelectedStartup(null);
@@ -2100,6 +2419,7 @@ export default function App() {
                 setIsAcquireStartupsPage(true);
                 window.location.hash = "acquire-startups";
               }}
+              onHappenings={openHappeningsPage}
               onSell={() => {
                 setSelectedStartup(null);
                 setSelectedCategory(null);
@@ -2138,6 +2458,13 @@ export default function App() {
                 onClose={() => {
                   window.history.pushState("", document.title, window.location.pathname + window.location.search);
                   setIsSellStartupPage(false);
+                }}
+              />
+            ) : isHappeningsPage ? (
+              <HappeningsPage
+                onClose={() => {
+                  window.history.pushState("", document.title, window.location.pathname + window.location.search);
+                  setIsHappeningsPage(false);
                 }}
               />
             ) : isAcquireStartupsPage ? (
@@ -2195,7 +2522,7 @@ export default function App() {
                     </button>
                   </div>
                 </section>
-                <PodiumSection rows={leaderboard} />
+                <PodiumSection rows={activeLeaderboard} />
                 <section className="mt-6">
                   <div className="mx-auto flex w-full max-w-[min(1400px,92vw)] flex-wrap items-center justify-between gap-3 rounded-[26px] border border-[#3b5075]/85 bg-[linear-gradient(130deg,rgba(10,16,28,0.92)_0%,rgba(8,13,24,0.96)_100%)] px-5 py-4 shadow-[0_0_0_1px_rgba(141,173,230,0.24),0_22px_54px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(201,221,255,0.15)] backdrop-blur-xl sm:flex-nowrap">
                     <div className="inline-flex items-center gap-3 text-[clamp(1.45rem,1.8vw,2rem)] font-bold">
@@ -2224,11 +2551,11 @@ export default function App() {
                     </div>
                   </div>
                 </section>
-                <LeaderboardTable rows={leaderboard} onSelectStartup={openStartup} />
+                <LeaderboardTable rows={activeLeaderboard} onSelectStartup={openStartup} />
                 <div id="home-marketplace">
-                  <Section title="Recently listed" items={recentlyListed} onSelectStartup={openStartup} />
+                  <Section title="Recently listed" items={activeRecentlyListed} onSelectStartup={openStartup} />
                 </div>
-                <Section title="Best deals this week" items={bestDeals} onSelectStartup={openStartup} />
+                <Section title="Best deals this week" items={activeBestDeals} onSelectStartup={openStartup} />
               </>
             )}
 
@@ -2246,6 +2573,70 @@ export default function App() {
                 setSelectedCategory(category);
               }}
             />
+            {showDailyPopup ? (
+              <div className="fixed bottom-5 right-5 z-50">
+                {isPopupCollapsed ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsPopupCollapsed(false)}
+                    className="inline-flex items-center gap-2 rounded-full border border-[#5b3a9e] bg-[#140f25] px-4 py-2 text-xs font-semibold text-[#d8c7ff] shadow-[0_10px_25px_rgba(0,0,0,0.35)]"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Spot the Next Big Thing
+                  </button>
+                ) : (
+                  <div className="w-[min(360px,92vw)] rounded-2xl border border-[#6b2fbf] bg-[#0e1424] p-4 shadow-[0_20px_40px_rgba(0,0,0,0.45)]">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="grid h-10 w-10 place-content-center rounded-xl bg-[#1c1f3a] text-lg"><Sparkles className="h-5 w-5 text-[#d1b4ff]" /></span>
+                        <div>
+                          <p className="text-[13px] font-semibold text-[#d1b4ff]">Spot the Next Big Thing</p>
+                          <p className="text-[11px] text-[#9aa3b9]">Get the weekly data report.</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setIsPopupCollapsed(true)}
+                          className="rounded-full border border-[#2b2f44] bg-[#121829] px-2 py-1 text-[11px] text-[#a9b3c8]"
+                        >
+                          ?
+                        </button>
+                        <button
+                          type="button"
+                          onClick={dismissDailyPopup}
+                          className="rounded-full border border-[#2b2f44] bg-[#121829] px-2 py-1 text-[11px] text-[#a9b3c8]"
+                        >
+                          ?
+                        </button>
+                      </div>
+                    </div>
+
+                    <p className="mt-3 text-xs text-[#b7c0d8]">
+                      Top 5 fastest growing startups, best 3 startups for sale, and 1 underdog spotlight.
+                    </p>
+
+                    <div className="mt-4 flex items-center gap-2 rounded-xl border border-[#1f2b42] bg-[#121827] px-3 py-2 text-xs text-[#9fb0cf]">
+                      <Mail size={12} />
+                      <input
+                        type="email"
+                        placeholder="enter@your.email"
+                        className="w-full bg-transparent text-xs text-[#dbe3f5] placeholder:text-[#65708a] focus:outline-none"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      className="mt-3 w-full rounded-xl bg-[linear-gradient(120deg,#6d28d9_0%,#9333ea_45%,#db2777_100%)] px-4 py-2 text-xs font-semibold text-white shadow-[0_10px_20px_rgba(109,40,217,0.35)]"
+                    >
+                      Send me the data <ChevronRight size={14} />
+                    </button>
+
+                    <p className="mt-2 text-[11px] text-[#8d97ad]">5,000+ entrepreneurs are already subscribed. Just saying.</p>
+                  </div>
+                )}
+              </div>
+            ) : null}
           </main>
 
           <aside className="order-3 grid gap-2 sm:grid-cols-2 lg:sticky lg:top-2 lg:max-h-[calc(100vh-1rem)] lg:grid-cols-1 lg:overflow-y-auto lg:overflow-x-hidden lg:pr-1 hide-scrollbar">
@@ -2254,7 +2645,7 @@ export default function App() {
                   SPONSORS OF THE DAY
                 </p>
               </div>
-            {rightFeatures.map((feature, index) => (
+            {activeRightFeatures.map((feature, index) => (
               <SidebarCard
                 key={feature.title}
                 title={feature.title}
@@ -2263,7 +2654,7 @@ export default function App() {
                 icon={feature.icon}
                 rotations={feature.rotations}
                 disableAutoFlip
-                flipSignal={activeSponsorTile === leftFeatures.length + index ? sponsorFlipStep : undefined}
+                flipSignal={activeSponsorTile === activeLeftFeatures.length + index ? sponsorFlipStep : undefined}
                 onSelect={(entry) => openStartup(entry)}
               />
             ))}
@@ -2276,7 +2667,6 @@ export default function App() {
     </div>
   );
 }
-
 
 
 

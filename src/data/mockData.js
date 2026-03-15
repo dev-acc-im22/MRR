@@ -112,8 +112,8 @@ function inferCategory(text) {
   return "SaaS";
 }
 const recentlyListedSeed = [
-  { logo: "PT", name: "PicToLines.com", niche: "AI", revenue: "$98", price: "$1.9k", multiple: "1.6x", anonymous: true },
-  { logo: "SS", name: "SetSmart", niche: "SaaS", revenue: "$16k", price: "$499k", multiple: "2.6x" },
+  { logo: "PT", name: "PicToLines.com", niche: "AI", revenue: "$98", price: "$1.9k", multiple: "1.6x", anonymous: true, verifiedRevenue: true },
+  { logo: "SS", name: "SetSmart", niche: "SaaS", revenue: "$16k", price: "$499k", multiple: "2.6x", verifiedRevenue: true, verifiedFounder: true },
   { logo: "AF", name: "AlgoFuse.ai", niche: "AI", revenue: "$1.9k", price: "$109k", multiple: "4.8x" },
   { logo: "MR", name: "motionreplica", niche: "AI", revenue: "$52", price: "$300", multiple: "1.3x" },
   { logo: "UR", name: "UserRally", niche: "AI", revenue: "$20k", price: "$310k", multiple: "1.9x" },
@@ -125,7 +125,7 @@ export const recentlyListed = recentlyListedSeed.map((item) => ({
 }));
 
 const bestDealsSeed = [
-  { logo: "LF", name: "LeadFind.ai", niche: "SaaS", revenue: "$933", price: "$15k", multiple: "1.3x" },
+  { logo: "LF", name: "LeadFind.ai", niche: "SaaS", revenue: "$933", price: "$15k", multiple: "1.3x", verifiedFounder: true },
   { logo: "CM", name: "Caricature Maker", niche: "AI", revenue: "$256", price: "$6k", multiple: "2.0x" },
   { logo: "DP", name: "DropPop", niche: "SaaS", revenue: "$6k", price: "$140k", multiple: "2.0x" },
   { logo: "LK", name: "Looktara", niche: "SaaS", revenue: "$3.1k", price: "$40k", multiple: "1.1x" },
@@ -138,7 +138,7 @@ export const bestDeals = bestDealsSeed.map((item) => ({
 }));
 
 const seedLeaderboard = [
-  { startup: "Tri-Tech", startupTag: "Tri-Tech enables people to make a living with AI tutors", founder: "Vitali Dodonov", mrr: 950000, growth: "up", growthPct: "18%", anonymous: true },
+  { startup: "Tri-Tech", startupTag: "Tri-Tech enables people to make a living with AI tutors", founder: "Vitali Dodonov", mrr: 950000, growth: "up", growthPct: "18%", anonymous: true, verifiedRevenue: true },
   { startup: "PulseCRM", startupTag: "CRM workflows for founders and growth teams", founder: "Nora West", mrr: 828647, growth: "up", growthPct: "12%" },
   { startup: "TrimRx", startupTag: "Telehealth workflows for modern clinics", founder: "Cris", mrr: 756922, growth: "down", growthPct: "6%" },
   { startup: "Rezi", startupTag: "Resume tools used by thousands of job seekers", founder: "Jacob Jacquet", mrr: 287921, growth: "flat", growthPct: "0%", forSale: true },

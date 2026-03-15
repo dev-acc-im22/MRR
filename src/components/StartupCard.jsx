@@ -2,6 +2,8 @@ import { UserX } from "lucide-react";
 ﻿export default function StartupCard({ item, onSelect }) {
   const category = item.category || "SaaS";
   const isAnonymous = Boolean(item.anonymous || item.isAnonymous);
+  const verifiedRevenue = Boolean(item.verifiedRevenue);
+  const verifiedFounder = Boolean(item.verifiedFounder);
   const nicheText = typeof item.niche === "string" ? item.niche.trim() : "";
   const normalize = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
   const showNiche = nicheText.length > 0 && normalize(nicheText) !== normalize(category);
@@ -27,11 +29,21 @@ import { UserX } from "lucide-react";
         </span>
         <div className="min-w-0">
           <p className="truncate text-[11px] font-semibold leading-[1.2] text-[#5fc0ff]">{item.name}</p>
-          <div className="mt-1 flex items-center gap-1.5">
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
             {showNiche ? <span className="truncate text-[9px] leading-[1.2] text-[#a5acb7]">{nicheText}</span> : null}
             <span className="shrink-0 rounded-full border border-[#3b4458]/35 bg-[#202634]/20 px-1.5 py-[2px] text-[8px] font-medium text-[#8c97ad]">
               {category}
             </span>
+            {verifiedRevenue ? (
+              <span className="shrink-0 rounded-full border border-[#2f5f45] bg-[#10241a] px-1.5 py-[2px] text-[8px] font-medium text-[#7de3aa]">
+                Verified Revenue
+              </span>
+            ) : null}
+            {verifiedFounder ? (
+              <span className="shrink-0 rounded-full border border-[#2f4663] bg-[#0f1c2e] px-1.5 py-[2px] text-[8px] font-medium text-[#9fc2ff]">
+                Verified Founder
+              </span>
+            ) : null}
           </div>
         </div>
       </div>
